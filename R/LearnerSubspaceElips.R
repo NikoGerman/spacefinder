@@ -6,12 +6,6 @@ LearnerSubspaceElips <- R6::R6Class(
   inherit = LearnerSubspace,
 
   private = list(
-    #' Fit minimum volume ellipsoid containing all points
-    #' Uses convex optimization to find ellipsoid parameters
-    #' @param data Matrix or data.table of hyperparameter values
-    #' @param lambda Regularization parameter for slack variables (default = 0)
-    #'               When lambda > 0, allows some points outside ellipsoid
-    #'               with penalty. Higher lambda = more tolerance for outliers
     .fit_subspace = function(data, lambda) {
       X <- as.matrix(data) # Convert to n × p matrix
       n <- nrow(X)

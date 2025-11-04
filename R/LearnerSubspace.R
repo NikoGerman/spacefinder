@@ -1,21 +1,21 @@
-#' @include task_subspace.R
 #' @title LearnerSubspace base class
 #' @export
 LearnerSubspace <- R6::R6Class(
   "LearnerSubspace",
+  #' @field task A TaskSubspace object
+  #' @field result training result
+  #' @field top_configs the best hyperparameter configurations w.r.t. to q-value and target_measure
   public = list(
     task = NULL,
     result = NULL,
     top_configs = NULL,
 
-    #' Initialize the SubspaceLearner
     #' @param task A `TaskSubspace` object
     initialize = function(task) {
       stopifnot(inherits(task, "TaskSubspace"))
       self$task <- task
     },
 
-    #' Train subspaces
     #' @param tasks Character vector of task names to include (optional, yet mutually exclusive with exclude_tasks)
     #' @param exclude_tasks Character vector of task names to exclude (optional)
     #' @param q_val Quantile threshold for filtering configurations (0-1)
@@ -68,15 +68,11 @@ LearnerSubspace <- R6::R6Class(
   ),
 
   private = list(
-    #' Abstract method to be implemented by subclasses
-    #' @param data Matrix or data.table of hyperparameter values
-    #' @param lambda Regularization parameter
-    #' @param ... Additional arguments
     .fit_subspace = function(data, lambda, ...) {
       stop("Subclasses must implement the .fit_subspace() method")
     },
 
-    #' Validate common training inputs
+    # Validate common training inputs
     .validate_train_inputs = function(
       tasks,
       exclude_tasks,
@@ -121,7 +117,7 @@ LearnerSubspace <- R6::R6Class(
       }
     },
 
-    #' Resolve which tasks to use based on tasks/exclude_tasks arguments
+    # Resolve which tasks to use based on tasks/exclude_tasks arguments
     .resolve_tasks = function(tasks, exclude_tasks) {
       if (!is.null(tasks)) {
         return(tasks)
@@ -130,7 +126,7 @@ LearnerSubspace <- R6::R6Class(
       return(setdiff(unique(self$task$data$task), exclude_tasks))
     },
 
-    #' Filter data to top quantile configurations
+    # Filter data to top quantile configurations
     .filter_top_quantile = function(
       data,
       target_measure,

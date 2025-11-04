@@ -5,14 +5,6 @@ LearnerSubspaceBox <- R6::R6Class(
   "LearnerSubspaceBox",
   inherit = LearnerSubspace,
   private = list(
-    #' Fit minimum volume hyperrectangle containing all points
-    #' Uses convex optimization to find min/max parameters
-    #' @param data Matrix or data.table of hyperparameter values
-    #' @param lambda Regularization parameter for slack variables (default = 0)
-    #'               When lambda > 0, allows some points outside hyperrectangle
-    #'               with penalty. Higher lambda = more tolerance for outliers
-    #' @param ... additional parameters like l0, u0: reference lower and
-    #'            upper value for slack scaling
     .fit_subspace = function(data, lambda, ...) {
       X <- as.matrix(data) # Convert to n × p matrix
       n <- nrow(X) # number of observations
