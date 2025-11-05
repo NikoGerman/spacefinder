@@ -1,17 +1,20 @@
 #' @include LearnerSubspaceElips.R helper.R
 #' @title autoplot method for LearnerSubspaceElips
 #' @param object A LearnerSubspaceElips object
+#' @param select selected columns to print pairwise
 #' @param wrap flag: Wrap plots using patchwork?
+#' @param force flag: Force wrapping?
 #' @param size_top point size of top_config points
 #' @param size_all point size of all points in the dataset
 #' @param ... Additional arguments to patchwork::wrap_plots()
-#' @param ... Additional arguments (unused)
 #' @exportS3Method ggplot2::autoplot
 autoplot.LearnerSubspaceElips <- function(
   object,
+  select = "all",
+  force = FALSE,
+  wrap = TRUE,
   size_top = .7,
   size_all = .5,
-  wrap = TRUE,
   ...
 ) {
   check_ggplot2()
@@ -22,23 +25,58 @@ autoplot.LearnerSubspaceElips <- function(
   if (is.null(object$result)) {
     stop("No result found. Run train() first.")
   }
+
+  selected_cols <- resolve_selected(object, select)
+
+  if (!force && wrap && length(selected_cols) > 3) {
+    message(sprintf(
+      "Plotting with %d selected hyperparameters results in up to %d plots (per category).\n
+      Wrapping this many plots onto one results in very poor readability.",
+      length(selected_cols),
+      choose(length(selected_cols), 2)
+    ))
+    response <- readline("Continue? (y/n): ")
+    if (!tolower(response) %in% c("y", "yes")) {
+      message("Plotting cancelled.")
+      return(invisible(object))
+    }
+  }
+
   if (is.null(object$task$cat_hps)) {
     plots <- create_ellipsoid_pairwise_plots(
       stats::coef(object),
-      hps = object$task$hps,
-      top_configs = object$top_configs,
-      data = object$task$data,
+      hps = selected_cols,
+      top_configs = object$top_configs[, mget(selected_cols)],
+      data = object$task$data[, mget(selected_cols)],
       n_points = 300,
       size_top = size_top,
-      size_all = size_all
+      size_all = size_all,
+      wrap = wrap
     )
-    if (wrap) {
-      return(patchwork::wrap_plots(plots, ...))
-    } else {
-      return(plots)
-    }
+    return(plots)
   } else {
-    print("not yet supported")
+    coefs <- stats::coef(object)
+    levels <- names(object$result)
+    cat_hps <- object$task$cat_hps
+    plots <- lapply(levels, \(x) {
+      create_ellipsoid_pairwise_plots(
+        coefficients = coefs[get(cat_hps) == x, ],
+        hps = selected_cols,
+        top_configs = object$top_configs[
+          get(cat_hps) == x,
+          mget(selected_cols)
+        ],
+        data = object$task$data[get(cat_hps) == x, mget(selected_cols)],
+        n_points = 300,
+        size_top = size_top,
+        size_all = size_all,
+        wrap = wrap,
+        cat_hps = cat_hps,
+        level = x
+      )
+    })
+    names(plots) <- levels
+    return(plots)
   }
 }
 
@@ -50,7 +88,11 @@ create_ellipsoid_pairwise_plots <- function(
   data,
   n_points,
   size_top,
-  size_all
+  size_all,
+  wrap,
+  cat_hps = NULL,
+  level = NULL,
+  ...
 ) {
   A <- coefficients$A[[1]]
   b <- coefficients$b[[1]]
@@ -79,18 +121,16 @@ create_ellipsoid_pairwise_plots <- function(
     A_sub <- A[c(i, j), c(i, j)]
     b_sub <- b[c(i, j)]
 
+    # compute upper cholesky decomposition
     R <- chol(A_sub)
-
-    ellipse_points <- t(backsolve(R, forwardsolve(t(R), t(circle) - b_sub)))
 
     # Compute center
     center <- -backsolve(R, forwardsolve(t(R), b_sub))
 
+    # Compute ellipsoid points
+    ellipse_points <- t(backsolve(R, forwardsolve(t(R), t(circle) - b_sub)))
     ellipse_dt <- data.table::as.data.table(ellipse_points)
     colnames(ellipse_dt) <- c("x", "y")
-
-    # Create title
-    title <- paste0(hp1, " vs ", hp2)
 
     p_plot <- ggplot2::ggplot(ellipse_dt, ggplot2::aes(x = x, y = y)) +
       ggplot2::geom_polygon(fill = "#2E86AB", alpha = 0.05) +
@@ -117,7 +157,11 @@ create_ellipsoid_pairwise_plots <- function(
         size = size_all
       ) +
       ggplot2::labs(
-        title = title,
+        title = if (wrap || is.null(cat_hps) || is.null(level)) {
+          NULL
+        } else {
+          sprintf("%s = %s", cat_hps, level)
+        },
         x = hp1,
         y = hp2
       ) +
@@ -129,5 +173,17 @@ create_ellipsoid_pairwise_plots <- function(
     plots[[length(plots) + 1]] <- p_plot
   }
 
-  return(plots)
+  if (wrap) {
+    combined <- (patchwork::wrap_plots(plots, ...)) +
+      patchwork::plot_annotation(
+        title = if (is.null(cat_hps) || is.null(level)) {
+          NULL
+        } else {
+          sprintf("%s = %s", cat_hps, level)
+        }
+      )
+    return(combined)
+  } else {
+    return(plots)
+  }
 }

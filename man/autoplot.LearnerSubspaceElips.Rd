@@ -4,18 +4,30 @@
 \alias{autoplot.LearnerSubspaceElips}
 \title{autoplot method for LearnerSubspaceElips}
 \usage{
-\method{autoplot}{LearnerSubspaceElips}(object, size_top = 0.7, size_all = 0.5, wrap = TRUE, ...)
+\method{autoplot}{LearnerSubspaceElips}(
+  object,
+  select = "all",
+  force = FALSE,
+  wrap = TRUE,
+  size_top = 0.7,
+  size_all = 0.5,
+  ...
+)
 }
 \arguments{
 \item{object}{A LearnerSubspaceElips object}
+
+\item{select}{selected columns to print pairwise}
+
+\item{force}{flag: Force wrapping?}
+
+\item{wrap}{flag: Wrap plots using patchwork?}
 
 \item{size_top}{point size of top_config points}
 
 \item{size_all}{point size of all points in the dataset}
 
-\item{wrap}{flag: Wrap plots using patchwork?}
-
-\item{...}{Additional arguments (unused)}
+\item{...}{Additional arguments to patchwork::wrap_plots()}
 }
 \description{
 autoplot method for LearnerSubspaceElips

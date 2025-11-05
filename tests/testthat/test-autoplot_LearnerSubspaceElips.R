@@ -11,18 +11,23 @@ test_that("basic tests", {
     )
   )
 
-  tsk <- as_task_subspace(DT, formula = auc ~ (hp1 + hp2 + hp3))
+  tsk <- as_task_subspace(DT, formula = auc ~ (hp1 + hp2 + hp3) * cat_hp)
   learner <- LearnerSubspaceElips$new(tsk)
   expect_error(autoplot(learner))
 
   learner$train()
+  coef(learner)
   plots_wrapped <- ggplot2::autoplot(
     learner,
     size_top = 3,
     size_all = 2,
     wrap = TRUE
   )
-  expect_true(inherits(plots_wrapped, "patchwork"))
+  expect_true(all(vapply(
+    plots_wrapped,
+    \(plot) inherits(plot, "patchwork"),
+    logical(1)
+  )))
 
   plots_unwrapped <- ggplot2::autoplot(
     learner,
@@ -30,9 +35,19 @@ test_that("basic tests", {
     size_all = 1.2,
     wrap = FALSE
   )
-  expect_true(all(vapply(
-    plots_unwrapped,
-    \(x) inherits(x, "ggplot"),
-    logical(1)
-  )))
+  expect_true(all(
+    vapply(
+      plots_unwrapped,
+      \(plots) {
+        all(
+          vapply(
+            plots,
+            \(x) inherits(x, "ggplot"),
+            logical(1)
+          )
+        )
+      },
+      logical(1)
+    )
+  ))
 })
