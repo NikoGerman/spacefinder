@@ -1,13 +1,17 @@
 #' @include LearnerSubspaceBox.R helper.R
 #' @title autoplot method for LearnerSubspaceBox
 #' @param object A LearnerSubspaceBox object
+#' @param select selected columns to print pairwise
 #' @param wrap flag: Wrap plots using patchwork?
+#' @param force flag: Force wrapping?
 #' @param size_top point size of top_config points
 #' @param size_all point size of all points in the dataset
 #' @param ... Additional arguments to patchwork::wrap_plots()
 #' @exportS3Method ggplot2::autoplot
 autoplot.LearnerSubspaceBox <- function(
   object,
+  select = "all",
+  force = FALSE,
   wrap = TRUE,
   size_top = .7,
   size_all = .5,
@@ -21,9 +25,26 @@ autoplot.LearnerSubspaceBox <- function(
   if (is.null(object$result)) {
     stop("No result found. Run train() first.")
   }
+
+  selected_cols <- resolve_selected(object, select)
+
+  if (!force && wrap && length(selected_cols) > 3) {
+    message(sprintf(
+      "Plotting with %d selected hyperparameters results in up to %d plots (per category).\n
+      Wrapping this many plots onto one results in very poor readability.",
+      length(selected_cols),
+      choose(length(selected_cols), 2)
+    ))
+    response <- readline("Continue? (y/n): ")
+    if (!tolower(response) %in% c("y", "yes")) {
+      message("Plotting cancelled.")
+      return(invisible(object))
+    }
+  }
+
   plots <- list()
   if (is.null(object$task$cat_hps)) {
-    pairs <- utils::combn(object$task$hps, 2, simplify = FALSE)
+    pairs <- utils::combn(selected_cols, 2, simplify = FALSE)
     coefs <- stats::coef(object)
     for (pair in pairs) {
       hp1 <- pair[[1]]
@@ -59,10 +80,12 @@ autoplot.LearnerSubspaceBox <- function(
         ggplot2::theme_minimal() +
         ggplot2::theme(
           plot.title = ggplot2::element_text(face = "bold", size = 10)
-        ) +
-        ggplot2::ggtitle(paste(hp1, "vs", hp2))
+        )
 
       plots[[length(plots) + 1]] <- p
+    }
+    if (wrap) {
+      plots <- patchwork::wrap_plots(plots, ...)
     }
   } else {
     levels <- names(object$result)
@@ -70,7 +93,7 @@ autoplot.LearnerSubspaceBox <- function(
     for (level in levels) {
       subplots <- list()
       coefs <- stats::coef(object)[get(cat_hps) == level, ]
-      hps <- unique(coefs$hyperparameter)
+      hps <- intersect(selected_cols, unique(coefs$hyperparameter))
       if (length(hps) <= 1) {
         p <- ggplot2::ggplot(
           object$top_configs[get(cat_hps) == level],
@@ -102,7 +125,7 @@ autoplot.LearnerSubspaceBox <- function(
           ggplot2::theme(
             plot.title = ggplot2::element_text(face = "bold", size = 10)
           ) +
-          ggplot2::ggtitle(sprintf("%s (%s = %s)", hps, cat_hps, level))
+          ggplot2::ggtitle(sprintf("%s = %s", cat_hps, level))
         subplots[[length(subplots) + 1]] <- p
       } else {
         pairs <- utils::combn(hps, 2, simplify = FALSE)
@@ -141,22 +164,34 @@ autoplot.LearnerSubspaceBox <- function(
             ggplot2::theme(
               plot.title = ggplot2::element_text(face = "bold", size = 10)
             ) +
-            ggplot2::ggtitle(sprintf(
-              "%s vs %s (%s = %s)",
-              hp1,
-              hp2,
-              cat_hps,
-              level
-            ))
+            ggplot2::ggtitle(
+              if (wrap) {
+                NULL
+              } else {
+                sprintf(
+                  "%s = %s",
+                  cat_hps,
+                  level
+                )
+              }
+            )
           subplots[[length(subplots) + 1]] <- p
         }
       }
       if (wrap) {
-        plots[[length(plots) + 1]] <- patchwork::wrap_plots(subplots, ...)
+        plots[[length(plots) + 1]] <- patchwork::wrap_plots(subplots, ...) +
+          patchwork::plot_annotation(
+            title = sprintf(
+              "%s = %s",
+              cat_hps,
+              level
+            )
+          )
       } else {
         plots[[length(plots) + 1]] <- subplots
       }
     }
+    names(plots) <- levels
   }
   return(plots)
 }

@@ -4,10 +4,22 @@
 \alias{autoplot.LearnerSubspaceBox}
 \title{autoplot method for LearnerSubspaceBox}
 \usage{
-\method{autoplot}{LearnerSubspaceBox}(object, wrap = TRUE, size_top = 0.7, size_all = 0.5, ...)
+\method{autoplot}{LearnerSubspaceBox}(
+  object,
+  select = "all",
+  force = FALSE,
+  wrap = TRUE,
+  size_top = 0.7,
+  size_all = 0.5,
+  ...
+)
 }
 \arguments{
 \item{object}{A LearnerSubspaceBox object}
+
+\item{select}{selected columns to print pairwise}
+
+\item{force}{flag: Force wrapping?}
 
 \item{wrap}{flag: Wrap plots using patchwork?}
 

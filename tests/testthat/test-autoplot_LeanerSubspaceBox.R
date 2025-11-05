@@ -7,19 +7,22 @@ test_that("basic tests", {
       hp1 = rnorm(300),
       hp2 = rnorm(300),
       hp3 = rnorm(300),
+      hp4 = rnorm(300),
       cat_hp = sample(c("A", "B"), 300, replace = TRUE)
     )
   )
 
-  tsk <- as_task_subspace(DT, formula = auc ~ (hp1 + hp2 + hp3) * cat_hp)
+  tsk <- as_task_subspace(DT, formula = auc ~ (hp1 + hp2 + hp3 + hp4) * cat_hp)
   learner <- LearnerSubspaceBox$new(tsk)
   expect_error(autoplot(learner))
 
   learner$train()
+  coef(learner)
   plots_wrapped <- ggplot2::autoplot(
     learner,
     size_top = 1.5,
     size_all = 1.2,
+    force = TRUE,
     wrap = TRUE
   )
   expect_true(inherits(plots_wrapped, "list"))
