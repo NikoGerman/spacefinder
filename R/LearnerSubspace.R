@@ -1,5 +1,4 @@
 #' @title LearnerSubspace base class
-#' @export
 LearnerSubspace <- R6::R6Class(
   "LearnerSubspace",
   #' @field task A TaskSubspace object
@@ -123,7 +122,7 @@ LearnerSubspace <- R6::R6Class(
         return(tasks)
       }
       # exclude_tasks is provided
-      return(setdiff(unique(self$task$data$task), exclude_tasks))
+      return(base::setdiff(unique(self$task$data$task), exclude_tasks))
     },
 
     # Filter data to top quantile configurations

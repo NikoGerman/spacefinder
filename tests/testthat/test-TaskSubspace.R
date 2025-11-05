@@ -1,4 +1,4 @@
-test_that("multiplication works", {
+test_that("basic tests", {
   DT <- data.table(
     task = sample(c("T1", "T2", "T3"), 10, replace = TRUE),
     auc = runif(10),
@@ -6,8 +6,8 @@ test_that("multiplication works", {
     hp2 = rnorm(10),
     cat_hp = sample(c("A", "B"), 10, replace = TRUE)
   )
-  tsk1 <- as_task_subspace(DT, formula = auc ~ (hp1 + hp2) * cat_hp)
-  tsk2 <- as_task_subspace(
+  tsk1 <- TaskSubspace$new(DT, formula = auc ~ (hp1 + hp2) * cat_hp)
+  tsk2 <- TaskSubspace$new(
     DT,
     target_measure = "auc",
     hps = c("hp1", "hp2"),
@@ -23,11 +23,11 @@ test_that("multiplication works", {
     logical(1)
   )))
 
-  expect_error(as_task_subspace(
+  expect_error(TaskSubspace$new(
     DT[, -"task"],
     formula = auc ~ (hp1 + hp2) * cat_hp
   ))
-  expect_warning(as_task_subspace(
+  expect_warning(TaskSubspace$new(
     DT,
     formula = auc ~ (hp1 + hp2) * cat_hp,
     target_measure = "auc"

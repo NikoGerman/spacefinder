@@ -11,7 +11,7 @@ coef.LearnerSubspaceBox <- function(
     stop("Use 'train()' method first")
   }
   if (!is.null(object$task$cat_hps)) {
-    return(rbindlist(
+    return(data.table::rbindlist(
       lapply(object$result, \(x) x$coefficients),
       idcol = object$task$cat_hps
     ))

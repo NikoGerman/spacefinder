@@ -10,7 +10,10 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 Suggests: 
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    withr,
+    ggplot2,
+    patchwork
 Config/testthat/edition: 3
 Collate: 
     'LearnerSubspace.R'
@@ -18,5 +21,17 @@ Collate:
     'LearnerSubspaceElips.R'
     'TaskSubspace.R'
     'as_task_subspace.R'
+    'helper.R'
+    'autoplot_LeanerSubspaceBox.R'
+    'autoplot_LearnerSubspaceElips.R'
     'coef_LearnerSubspaceBox.R'
     'coef_LearnerSubspaceElips.R'
+    'outliers_LearnerSubspace.R'
+    'spacefinder-package.R'
+    'summary_LearnerSubspace.R'
+Imports: 
+    checkmate,
+    CVXR,
+    data.table,
+    knitr,
+    R6

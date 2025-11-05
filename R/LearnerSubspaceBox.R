@@ -48,7 +48,7 @@ LearnerSubspaceBox <- R6::R6Class(
 
           # Return results
           return(list(
-            coefficients = data.table(
+            coefficients = data.table::data.table(
               hyperparameter = colnames(X),
               min = c(result$getValue(l)),
               max = c(result$getValue(u))
@@ -102,7 +102,7 @@ LearnerSubspaceBox <- R6::R6Class(
 
         # Return results
         return(list(
-          coefficients = data.table(
+          coefficients = data.table::data.table(
             hyperparameter = colnames(X),
             min = c(result$getValue(l)),
             max = c(result$getValue(u))
@@ -126,7 +126,7 @@ LearnerSubspaceBox <- R6::R6Class(
         col_min <- apply(X, 2, min)
         col_max <- apply(X, 2, max)
         return(list(
-          coefficients = data.table(
+          coefficients = data.table::data.table(
             hyperparameter = colnames(X),
             min = col_min,
             max = col_max

@@ -27,8 +27,7 @@ LearnerSubspaceElips <- R6::R6Class(
           constraints <- lapply(1:n, function(t) {
             x_t <- X[t, 1]
             list(
-              abs(a * x_t + b) <= 1 + s[t],
-              s[t] >= 0
+              abs(a * x_t + b) <= 1 + s[t]
             )
           })
           constraints <- unlist(constraints, recursive = FALSE)
@@ -83,8 +82,7 @@ LearnerSubspaceElips <- R6::R6Class(
           constraints <- lapply(1:n, function(t) {
             x_t <- X[t, ]
             list(
-              CVXR::norm2(A %*% x_t + b) <= 1 + s[t],
-              s[t] >= 0
+              CVXR::norm2(A %*% x_t + b) <= 1 + s[t]
             )
           })
           constraints <- unlist(constraints, recursive = FALSE)
