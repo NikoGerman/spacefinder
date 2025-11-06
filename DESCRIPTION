@@ -13,18 +13,22 @@ Suggests:
     testthat (>= 3.0.0),
     withr,
     ggplot2,
-    patchwork
+    patchwork,
+    grDevices
 Config/testthat/edition: 3
 Collate: 
     'LearnerSubspace.R'
     'LearnerSubspaceBox.R'
+    'LearnerSubspaceBoxGeneral.R'
     'LearnerSubspaceElips.R'
     'TaskSubspace.R'
     'as_task_subspace.R'
     'helper.R'
     'autoplot_LeanerSubspaceBox.R'
+    'autoplot_LearnerSubspaceBoxGeneral.R'
     'autoplot_LearnerSubspaceElips.R'
     'coef_LearnerSubspaceBox.R'
+    'coef_LearnerSubspaceBoxGeneral.R'
     'coef_LearnerSubspaceElips.R'
     'outliers_LearnerSubspace.R'
     'spacefinder-package.R'

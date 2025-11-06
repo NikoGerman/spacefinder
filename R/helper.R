@@ -19,6 +19,16 @@ check_patchwork <- function() {
 }
 
 #' @keywords internal
+check_grDevices <- function() {
+  if (!requireNamespace("grDevices", quietly = TRUE)) {
+    stop(
+      "Package 'grDevices' needed for this function. Please install it.",
+      call. = FALSE
+    )
+  }
+}
+
+#' @keywords internal
 resolve_selected <- function(object, select) {
   present_hps <- object$task$hps
   if (select == "all") {
