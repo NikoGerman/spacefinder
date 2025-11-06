@@ -107,28 +107,29 @@ create_ellipsoid_pairwise_plots <- function(
 
   plots <- list()
 
+  # Compute full inverse and center ONCE
+  R_full <- chol(A)
+  A_inv <- chol2inv(R_full)
+  Sigma <- A_inv %*% t(A_inv)
+  center_full <- -A_inv %*% b
+
+  # Generate ellipse points
+  theta <- seq(0, 2 * pi, length.out = n_points)
+  circle <- cbind(cos(theta), sin(theta))
+
   for (pair in dim_pairs) {
     i <- pair[1]
     j <- pair[2]
     hp1 <- hps[[i]]
     hp2 <- hps[[j]]
 
-    # Generate ellipse points
-    theta <- seq(0, 2 * pi, length.out = n_points)
-    circle <- cbind(cos(theta), sin(theta))
+    # Extract 2D marginal: center and covariance submatrix
+    center_2d <- center_full[c(i, j)]
+    Sigma_2d <- Sigma[c(i, j), c(i, j)]
+    L <- t(chol(Sigma_2d))
 
-    # Extract 2D submatrix and vector
-    A_sub <- A[c(i, j), c(i, j)]
-    b_sub <- b[c(i, j)]
-
-    # compute upper cholesky decomposition
-    R <- chol(A_sub)
-
-    # Compute center
-    center <- -backsolve(R, forwardsolve(t(R), b_sub))
-
-    # Compute ellipsoid points
-    ellipse_points <- t(backsolve(R, forwardsolve(t(R), t(circle) - b_sub)))
+    # Transform circle to ellipse:
+    ellipse_points <- sweep(as.matrix(circle) %*% t(L), 2, center_2d, "+")
     ellipse_dt <- data.table::as.data.table(ellipse_points)
     colnames(ellipse_dt) <- c("x", "y")
 
@@ -136,8 +137,8 @@ create_ellipsoid_pairwise_plots <- function(
       ggplot2::geom_polygon(fill = "#2E86AB", alpha = 0.05) +
       ggplot2::geom_path(color = "#2E86AB", linewidth = 1) +
       ggplot2::geom_point(
-        x = center[1],
-        y = center[2],
+        x = center_2d[1],
+        y = center_2d[2],
         color = "#2E86AB",
         size = 3,
         shape = 18

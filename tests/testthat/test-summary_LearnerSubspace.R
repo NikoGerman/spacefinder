@@ -15,7 +15,9 @@ test_that("basic tests", {
 
   expect_error(summary(learner))
   learner$train()
-  summary.learner <- summary(learner)
+
+  # Suppress all output
+  invisible(capture.output(summary.learner <- summary(learner)))
 
   expect_true(all(
     c("status", "coefficients", "outliers") %in% names(summary.learner)

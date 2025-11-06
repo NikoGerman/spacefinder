@@ -16,7 +16,7 @@ test_that("basic tests", {
   expect_error(autoplot(learner))
 
   learner$train()
-  coef(learner)
+
   plots_wrapped <- ggplot2::autoplot(
     learner,
     size_top = 3,
