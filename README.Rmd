@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of spacefinder is to ...
+Spacefinder provides functionality to identify best performing minimum volume subspaces within the hyperparameter space.
 
 ## Installation
 
@@ -31,25 +31,38 @@ pak::pak("NikoGerman/spacefinder")
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
-
 ```{r example}
 library(spacefinder)
-## basic example code
+
+DT <- data.table::data.table(
+      task = sample(c("T1", "T2", "T3"), 300, replace = TRUE),
+      auc = sample(runif(30), 100, replace = TRUE),
+      hp1 = rnorm(300),
+      hp2 = rnorm(300),
+      hp3 = rnorm(300),
+      cat_hp = sample(c("A", "B"), 300, replace = TRUE)
+    )
+
+tsk <- as_task_subspace(DT, auc ~ (hp1 + hp2 + hp3) * cat_hp)
+
+learner <- LearnerSubspaceBox$new(tsk)
+
+# train with slack
+learner$train(lambda = .05)
 ```
+
+```{r summary}
+summary(learner)
+```
+
 
 What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
 
-```{r cars}
-summary(cars)
+
+```{r autoplot}
+ggplot2::autoplot(learner, wrap = TRUE)$A
+```
+```{r outliers}
+outliers(learner)
 ```
 
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this.
-
-You can also embed plots, for example:
-
-```{r pressure, echo = FALSE}
-plot(pressure)
-```
-
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.
