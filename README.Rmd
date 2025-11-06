@@ -34,13 +34,14 @@ pak::pak("NikoGerman/spacefinder")
 ```{r example}
 library(spacefinder)
 
-DT <- data.table::data.table(
+withr::with_seed(1, DT <- data.table::data.table(
       task = sample(c("T1", "T2", "T3"), 300, replace = TRUE),
       auc = sample(runif(30), 100, replace = TRUE),
       hp1 = rnorm(300),
       hp2 = rnorm(300),
       hp3 = rnorm(300),
       cat_hp = sample(c("A", "B"), 300, replace = TRUE)
+      )
     )
 
 tsk <- as_task_subspace(DT, auc ~ (hp1 + hp2 + hp3) * cat_hp)
