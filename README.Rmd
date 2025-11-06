@@ -55,10 +55,6 @@ learner$train(lambda = .05)
 summary(learner)
 ```
 
-
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
-
-
 ```{r autoplot}
 ggplot2::autoplot(learner, wrap = TRUE)$A
 ```
