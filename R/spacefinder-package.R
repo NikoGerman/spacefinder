@@ -7,7 +7,7 @@
 "_PACKAGE"
 
 # Suppress R CMD check notes for data.table and ggplot2 NSE
-utils::globalVariables(c("hyperparameter", "x", "y"))
+utils::globalVariables(c("count", "hyperparameter", "x", "y"))
 
 ## usethis namespace: start
 ## usethis namespace: end

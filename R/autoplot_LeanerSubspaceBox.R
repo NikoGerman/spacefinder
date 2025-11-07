@@ -17,10 +17,11 @@ autoplot.LearnerSubspaceBox <- function(
   size_all = .5,
   ...
 ) {
-  check_ggplot2()
+  pkgs <- c("ggplot2")
   if (wrap) {
-    check_patchwork()
+    pkgs <- c(pkgs, "patchwork")
   }
+  check_packages(pkgs)
 
   if (is.null(object$result)) {
     stop("No result found. Run train() first.")

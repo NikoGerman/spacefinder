@@ -1,28 +1,16 @@
 #' @keywords internal
-check_ggplot2 <- function() {
-  if (!requireNamespace("ggplot2", quietly = TRUE)) {
+check_packages <- function(pkgs) {
+  missing <- vapply(
+    pkgs,
+    \(pkg) !requireNamespace(pkg, quietly = TRUE),
+    logical(1)
+  )
+  if (any(missing)) {
     stop(
-      "Package 'ggplot2' needed for this function. Please install it.",
-      call. = FALSE
-    )
-  }
-}
-
-#' @keywords internal
-check_patchwork <- function() {
-  if (!requireNamespace("patchwork", quietly = TRUE)) {
-    stop(
-      "Package 'patchwork' needed for this function. Please install it.",
-      call. = FALSE
-    )
-  }
-}
-
-#' @keywords internal
-check_grDevices <- function() {
-  if (!requireNamespace("grDevices", quietly = TRUE)) {
-    stop(
-      "Package 'grDevices' needed for this function. Please install it.",
+      sprintf(
+        "Package(s) %s needed for this function. Please install it/them.",
+        paste0(sprintf("'%s'", pkgs[missing]), collapse = " ,")
+      ),
       call. = FALSE
     )
   }

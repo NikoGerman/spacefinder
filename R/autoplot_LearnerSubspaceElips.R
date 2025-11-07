@@ -17,10 +17,11 @@ autoplot.LearnerSubspaceElips <- function(
   size_all = .5,
   ...
 ) {
-  check_ggplot2()
+  pkgs <- c("ggplot2", "scales")
   if (wrap) {
-    check_patchwork()
+    pkgs <- c(pkgs, "patchwork")
   }
+  check_packages(pkgs)
 
   if (is.null(object$result)) {
     stop("No result found. Run train() first.")
@@ -96,10 +97,46 @@ create_ellipsoid_pairwise_plots <- function(
 ) {
   A <- coefficients$A[[1]]
   b <- coefficients$b[[1]]
+  hps <- intersect(hps, coefficients$hyperparameters[[1]])
   p <- nrow(A)
 
   if (p < 2) {
-    stop("Need at least 2 hyperparameters for pairwise plots")
+    message("Need at least 2 hyperparameters for pairwise plots")
+
+    A <- c(A)
+    b <- c(b)
+    center <- -b / A
+    borders <- c(-1, 1) / A + center
+
+    p <- ggplot2::ggplot(data, ggplot2::aes(x = !!ggplot2::sym(hps))) +
+      ggplot2::geom_histogram(ggplot2::aes(
+        y = ggplot2::after_stat(count / sum(count))
+      )) +
+      ggplot2::geom_rug(
+        data = top_configs,
+        ggplot2::aes(x = !!ggplot2::sym(hps)),
+        color = "orange"
+      ) +
+      ggplot2::geom_vline(
+        xintercept = borders,
+        color = "#2E86AB",
+        linewidth = 1.5
+      ) +
+      ggplot2::scale_y_continuous(labels = scales::percent) +
+      ggplot2::labs(
+        title = if (wrap || is.null(cat_hps) || is.null(level)) {
+          NULL
+        } else {
+          sprintf("%s = %s", cat_hps, level)
+        },
+        x = hps,
+        y = "frequency"
+      ) +
+      ggplot2::theme_minimal() +
+      ggplot2::theme(
+        plot.title = ggplot2::element_text(face = "bold", size = 10)
+      )
+    return(p)
   }
 
   # Create all pairwise combinations

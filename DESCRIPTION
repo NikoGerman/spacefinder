@@ -1,6 +1,6 @@
 Package: spacefinder
 Title: Find Promising Subspaces Within The Hyperparameter Space
-Version: 0.1.0
+Version: 0.1.0.9000
 Authors@R: 
     person("Nikolai", "German", , "niko.german@gmail.com", role = c("aut", "cre"),
     comment = c(ORCID = "https://orcid.org/0009-0001-7394-8367"))
@@ -14,7 +14,8 @@ Suggests:
     withr,
     ggplot2,
     patchwork,
-    grDevices
+    grDevices,
+    scales
 Config/testthat/edition: 3
 Collate: 
     'LearnerSubspace.R'
