@@ -22,7 +22,7 @@ coef.LearnerSubspaceBoxGeneral <- function(
     return(dt)
   } else {
     return(data.table::data.table(
-      hyperparamters = list(object$result$used_hps),
+      hyperparameters = list(object$result$used_hps),
       A = list(object$result$A),
       b = list(object$result$b)
     ))
