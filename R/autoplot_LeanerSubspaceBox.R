@@ -1,12 +1,94 @@
 #' @include LearnerSubspaceBox.R helper.R
-#' @title autoplot method for LearnerSubspaceBox
-#' @param object A LearnerSubspaceBox object
-#' @param select selected columns to print pairwise
-#' @param wrap flag: Wrap plots using patchwork?
-#' @param force flag: Force wrapping?
-#' @param size_top point size of top_config points
-#' @param size_all point size of all points in the dataset
-#' @param ... Additional arguments to patchwork::wrap_plots()
+#' @title Visualize fitted axis-aligned hyperrectangles
+#' @description
+#' Creates pairwise scatter plots showing fitted axis-aligned hyperrectangles
+#' overlaid on hyperparameter configurations. Displays both the top-performing
+#' configurations used for fitting and all data points for context.
+#'
+#' @param object A trained \code{LearnerSubspaceBox} object with fitted subspace
+#' @param select Character vector of hyperparameter names to plot, or "all"
+#'   (default) to plot all hyperparameters
+#' @param wrap Logical indicating whether to combine plots using
+#'   \code{patchwork::wrap_plots()}. Default: \code{TRUE}
+#' @param force Logical indicating whether to skip the confirmation prompt when
+#'   plotting many hyperparameters. Default: \code{FALSE}
+#' @param size_top Numeric point size for top-performing configurations
+#'   (orange crosses). Default: 0.7
+#' @param size_all Numeric point size for all data points (gray background).
+#'   Default: 0.5
+#' @param ... Additional arguments passed to \code{patchwork::wrap_plots()}
+#'   (only used when \code{wrap = TRUE})
+#'
+#' @return
+#' If \code{wrap = TRUE}: A single patchwork object combining all plots.
+#'
+#' If \code{wrap = FALSE} and no categorical hyperparameters: A list of ggplot objects,
+#' one per hyperparameter pair.
+#'
+#' If \code{wrap = FALSE} and categorical hyperparameters present: A named list where
+#' each element is a list of ggplot objects for that categorical level.
+#'
+#' @details
+#' \strong{Plot Structure:}
+#'
+#' Each plot shows:
+#' \itemize{
+#'   \item Gray points: All configurations in the dataset (low alpha)
+#'   \item Orange crosses: Top-performing configurations used for fitting
+#'   \item Blue rectangle: Fitted axis-aligned hyperrectangle (box bounds)
+#' }
+#'
+#' For \eqn{p} selected hyperparameters, creates \eqn{\binom{p}{2}} pairwise plots.
+#'
+#' \strong{Categorical Hyperparameters:}
+#'
+#' When the task includes a categorical hyperparameter, separate plots are created
+#' for each categorical level, showing the corresponding fitted box.
+#'
+#' \strong{Interactive Prompt:}
+#'
+#' When plotting more than 3 hyperparameters with wrapping enabled, the function
+#' prompts for confirmation due to potential readability issues. Use \code{force = TRUE}
+#' to bypass this prompt.
+#'
+#' \strong{Dependencies:}
+#'
+#' Requires \code{ggplot2}. If \code{wrap = TRUE}, also requires \code{patchwork}.
+#'
+#' @seealso
+#' \code{\link{LearnerSubspaceBox}} for the learner class.
+#' \code{\link{coef.LearnerSubspaceBox}} for extracting fitted bounds.
+#'
+#' @examples
+#' \dontrun{
+#' # Train learner
+#' task <- TaskSubspace$new(data, target_measure = "auc",
+#'                          hps = c("learning_rate", "max_depth"))
+#' learner <- LearnerSubspaceBox$new(task)
+#' learner$train(q_val = 0.9, lambda = 0.1)
+#'
+#' # Plot all hyperparameters (wrapped)
+#' autoplot(learner)
+#'
+#' # Plot specific hyperparameters
+#' autoplot(learner, select = c("learning_rate", "max_depth"))
+#'
+#' # Get individual plots without wrapping
+#' plots <- autoplot(learner, wrap = FALSE)
+#' plots[[1]]  # First pairwise plot
+#'
+#' # Customize wrapping layout
+#' autoplot(learner, ncol = 2, guides = "collect")
+#'
+#' # With categorical hyperparameters
+#' task <- TaskSubspace$new(data, target_measure = "auc",
+#'                          hps = c("learning_rate", "max_depth"),
+#'                          cat_hps = "optimizer")
+#' learner <- LearnerSubspaceBox$new(task)
+#' learner$train(q_val = 0.9)
+#' autoplot(learner)  # Separate plots per optimizer
+#' }
+#'
 #' @exportS3Method ggplot2::autoplot
 autoplot.LearnerSubspaceBox <- function(
   object,
@@ -24,15 +106,15 @@ autoplot.LearnerSubspaceBox <- function(
   check_packages(pkgs)
 
   if (is.null(object$result)) {
-    stop("No result found. Run train() first.")
+    stop("No result found. Run train() first.", call. = FALSE)
   }
 
   selected_cols <- resolve_selected(object, select)
 
   if (!force && wrap && length(selected_cols) > 3) {
     message(sprintf(
-      "Plotting with %d selected hyperparameters results in up to %d plots (per category).\n
-      Wrapping this many plots onto one results in very poor readability.",
+      "Plotting with %d selected hyperparameters results in up to %d plots (per category).
+Wrapping this many plots onto one results in very poor readability.",
       length(selected_cols),
       choose(length(selected_cols), 2)
     ))
