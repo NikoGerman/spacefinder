@@ -1,25 +1,128 @@
-#' @title LearnerSubspace base class
+#' @title Subspace learner base class
+#' @description
+#' Abstract R6 base class for learning hyperparameter subspaces that contain
+#' high-quality configurations. Provides a unified framework for fitting
+#' geometric regions (hyperrectangles, ellipsoids) to top-performing
+#' hyperparameter configurations identified by a quantile threshold.
+#'
+#' @details
+#' \strong{Overview:}
+#'
+#' Subspace learners identify promising regions in hyperparameter space by:
+#' \enumerate{
+#'   \item Filtering configurations to top quantile based on performance measure
+#'   \item Fitting a geometric subspace (implementation-specific) to filtered data
+#'   \item Optionally allowing outliers via regularization parameter \code{lambda}
+#' }
+#'
+#' \strong{Geometric Representations:}
+#'
+#' All learners represent subspaces via transformation \eqn{y = Ax + b} where:
+#' \itemize{
+#'   \item \eqn{x \in [0,1]^p} are unit cube coordinates
+#'   \item \eqn{y \in \mathbb{R}^p} are original hyperparameter coordinates
+#'   \item \eqn{A \in \mathbb{R}^{p \times p}} defines shape and orientation
+#'   \item \eqn{b \in \mathbb{R}^p} is the translation vector
+#' }
+#'
+#' Different learner types impose different structure on matrix \eqn{A}:
+#' \itemize{
+#'   \item \strong{Box}: \eqn{A} is diagonal (axis-aligned hyperrectangle)
+#'   \item \strong{Polygon}: \eqn{A} is general positive definite (oriented hyperrectangle)
+#'   \item \strong{Ellipsoid}: \eqn{A} is general positive definite (full ellipsoid)
+#' }
+#'
+#' \strong{Categorical Hyperparameters:}
+#'
+#' When the task includes categorical hyperparameters, separate subspaces are
+#' fitted for each categorical level independently. This allows different
+#' geometries for different categories (e.g., different learning rate ranges
+#' per optimizer).
+#'
+#' \strong{Regularization via Slack Variables:}
+#'
+#' The \code{lambda} parameter controls the volume-outlier trade-off:
+#' \itemize{
+#'   \item \code{lambda = NULL}: Hard constraints, all points must fit inside
+#'   \item \code{lambda > 0}: Soft constraints, allows outliers with penalty
+#'   \item Larger \code{lambda}: Smaller subspaces, more outliers tolerated
+#'   \item Smaller \code{lambda}: Larger subspaces, fewer outliers tolerated
+#' }
+#'
+#' \strong{Workflow:}
+#'
+#' \preformatted{
+#' # 1. Create task
+#' task <- SubspaceTask$new(data, target_measure = "accuracy")
+#'
+#' # 2. Initialize learner (use specific subclass)
+#' learner <- LearnerSubspaceBox$new(task)
+#'
+#' # 3. Train on top configurations
+#' learner$train(q_val = 0.9, lambda = 0.1)
+#'
+#' # 4. Extract fitted parameters
+#' coef(learner, vectorize = TRUE)
+#'
+#' # 5. Add density parameters
+#' augment(learner)
+#' }
+#'
+#' @seealso
+#' \code{\link{LearnerSubspaceBox}} for axis-aligned hyperrectangles.
+#' \code{\link{LearnerSubspacePolygon}} for oriented hyperrectangles.
+#' \code{\link{LearnerSubspaceEllipsoid}} for ellipsoids.
+#' \code{\link{TaskSubspace}} for task definition.
+#'
+#' @examples
+#' \dontrun{
+#' # This is an abstract class - use specific implementations
+#'
+#' # Create task
+#' task <- SubspaceTask$new(
+#'   data = benchmark_data,
+#'   target_measure = "auc",
+#'   cat_hps = "optimizer"
+#' )
+#'
+#' # Use Box learner (axis-aligned)
+#' learner_box <- LearnerSubspaceBox$new(task)
+#' learner_box$train(q_val = 0.9, lambda = 0.1)
+#'
+#' # Use Ellipsoid learner (most flexible)
+#' learner_ellip <- LearnerSubspaceEllipsoid$new(task)
+#' learner_ellip$train(q_val = 0.95, lambda = NULL)
+#'
+#' # Filter specific tasks
+#' learner_box$train(
+#'   q_val = 0.8,
+#'   tasks = c("task1", "task2"),
+#'   lambda = 0.05
+#' )
+#' }
+#' @export
 LearnerSubspace <- R6::R6Class(
   "LearnerSubspace",
-  #' @field task A TaskSubspace object
-  #' @field result training result
-  #' @field top_configs the best hyperparameter configurations w.r.t. to q-value and target_measure
   public = list(
+    #' @field task A TaskSubspace object
     task = NULL,
+    #' @field result Training result
     result = NULL,
+    #' @field top_configs Top hyperparameter configurations after quantile filtering
     top_configs = NULL,
 
-    #' @param task A `TaskSubspace` object
+    #' @description Create a new learner instance
+    #' @param task A \code{TaskSubspace} object
     initialize = function(task) {
       stopifnot(inherits(task, "TaskSubspace"))
       self$task <- task
     },
 
-    #' @param tasks Character vector of task names to include (optional, yet mutually exclusive with exclude_tasks)
-    #' @param exclude_tasks Character vector of task names to exclude (optional)
+    #' @description Train the learner on top-quantile configurations
     #' @param q_val Quantile threshold for filtering configurations (0-1)
-    #' @param lambda Regularization parameter for slack variables (default = NULL, no slack)
-    #'               Higher values allow more points outside the subspace
+    #' @param lambda Regularization parameter for slack variables (default = NULL)
+    #' @param tasks Character vector of task names to include (optional)
+    #' @param exclude_tasks Character vector of task names to exclude (optional)
     train = function(
       q_val = 1,
       lambda = NULL,
@@ -56,7 +159,7 @@ LearnerSubspace <- R6::R6Class(
       # Compute subspaces using subclass-specific fitting method
       self$result <- private$.compute_subspaces(
         data = self$top_configs,
-        FUN = private$.fit_subspace, # Abstract method implemented by subclasses
+        FUN = private$.fit_subspace,
         hps = self$task$hps,
         cat_hps = self$task$cat_hps,
         lambda = lambda
@@ -71,7 +174,6 @@ LearnerSubspace <- R6::R6Class(
       stop("Subclasses must implement the .fit_subspace() method")
     },
 
-    # Validate common training inputs
     .validate_train_inputs = function(
       tasks,
       exclude_tasks,
@@ -105,7 +207,6 @@ LearnerSubspace <- R6::R6Class(
         any.missing = FALSE
       )
 
-      # Validate task names exist in data
       if (!is.null(tasks) && !all(tasks %in% self$task$data$task)) {
         stop("All provided 'tasks' must be present in data")
       }
@@ -116,16 +217,13 @@ LearnerSubspace <- R6::R6Class(
       }
     },
 
-    # Resolve which tasks to use based on tasks/exclude_tasks arguments
     .resolve_tasks = function(tasks, exclude_tasks) {
       if (!is.null(tasks)) {
         return(tasks)
       }
-      # exclude_tasks is provided
       return(base::setdiff(unique(self$task$data$task), exclude_tasks))
     },
 
-    # Filter data to top quantile configurations
     .filter_top_quantile = function(
       data,
       target_measure,
@@ -133,7 +231,6 @@ LearnerSubspace <- R6::R6Class(
       cat_hps,
       q_val = 1
     ) {
-      # Determine columns to keep and grouping variables
       keep_cols <- c("task", target_measure, hps)
       by_vars <- "task"
 
@@ -150,7 +247,6 @@ LearnerSubspace <- R6::R6Class(
       return(data_with_qantile[get(target_measure) >= q, -"q", ])
     },
 
-    #' Agnostically compute subspaces
     .compute_subspaces = function(
       data,
       FUN,
@@ -159,7 +255,6 @@ LearnerSubspace <- R6::R6Class(
       cat_hps
     ) {
       if (!is.null(cat_hps)) {
-        # Handle categorical hyperparameters - separate fit per category
         result <- list()
         levels <- unique(data[[cat_hps]])
 
