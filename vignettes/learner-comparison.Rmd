@@ -1,0 +1,123 @@
+---
+title: "Comparing Subspace Learners"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Comparing Subspace Learners}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 8,
+  fig.height = 6,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+```{r setup}
+library(spacefinder)
+library(data.table)
+library(ggplot2)
+data("benchmark_data", package = "spacefinder")
+```
+
+## Introduction
+
+The `spacefinder` package offers three learner types that differ in how they represent promising hyperparameter regions:
+
+- **Box**: Axis-aligned hyperrectangles (simple bounds per hyperparameter)
+- **Polygon**: Oriented hyperrectangles (can rotate to capture correlations)
+- **Ellipsoid**: Ellipsoids (smooth, curved boundaries)
+
+Let's see how they compare on the same data.
+
+## Training All Three Learners
+```{r create_task}
+# Create task
+task <- TaskSubspace$new(
+  data = benchmark_data,
+  target_measure = "auc",
+  hps = c("learning_rate", "max_depth")
+)
+
+# Train all three learners with identical settings
+learner_box <- LearnerSubspaceBox$new(task)
+learner_box$train(q_val = 0.9, lambda = 0.1)
+
+learner_polygon <- LearnerSubspacePolygon$new(task)
+learner_polygon$train(q_val = 0.9, lambda = 0.1)
+
+learner_ellipsoid <- LearnerSubspaceEllipsoid$new(task)
+learner_ellipsoid$train(q_val = 0.9, lambda = 0.1)
+```
+
+## Visual Comparison
+
+The best way to understand the differences is to visualize them:
+```{r visual_comparison, fig.width=6, fig.height=4.8}
+p_box <- autoplot(learner_box) + 
+  ggtitle("Box: Axis-aligned") +
+  scale_x_continuous(limits = c(0, 0.01), breaks = seq(0, 0.01, by = 0.0025), guide = guide_axis(angle = 45)) +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 10))
+
+p_polygon <- autoplot(learner_polygon) + 
+  ggtitle("Polygon: Oriented") +
+  scale_x_continuous(limits = c(0, 0.01), breaks = seq(0, 0.01, by = 0.0025), guide = guide_axis(angle = 45)) +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 10))
+
+p_ellipsoid <- autoplot(learner_ellipsoid) + 
+  ggtitle("Ellipsoid: Smooth") +
+  scale_x_continuous(limits = c(0, 0.01), breaks = seq(0, 0.01, by = 0.0025), guide = guide_axis(angle = 45)) +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 10))
+
+# Combine plots
+patchwork::wrap_plots(p_box, p_polygon, p_ellipsoid, ncol = 3)
+```
+
+
+**Key differences:**
+
+- **Box**: Simple rectangle aligned with axes - easiest to interpret
+- **Polygon**: Can rotate to better fit the data - captures diagonal patterns
+- **Ellipsoid**: Smooth curved boundary - most flexible fit
+
+## Coefficients
+
+### Box: Simple Bounds
+```{r box_coef}
+coef(learner_box)
+```
+
+Box learners give you direct bounds: "use learning_rate between X and Y".
+
+### Polygon and Ellipsoid: Transformation Matrices
+```{r other_coefs}
+# Polygon
+coef(learner_polygon)
+
+# Ellipsoid  
+coef(learner_ellipsoid)
+```
+
+Polygon and Ellipsoid use transformation matrices **A** and **b**. These are harder to interpret but allow more flexible shapes.
+
+## Outliers
+```{r outliers}
+cat("Outliers identified:\n")
+cat("  Box:", nrow(outliers(learner_box)), "\n")
+cat("  Polygon:", nrow(suppressMessages(outliers(learner_polygon))), "\n")
+cat("  Ellipsoid:", nrow(suppressMessages(outliers(learner_ellipsoid))), "\n")
+```
+
+Different learners may identify different configurations as outliers based on their geometry.
+
+## Next Steps
+
+- `vignette("density-estimation")`: Add probabilistic density with `augment()`
+- `vignette("categorical-hyperparameters")`: Handle categorical variables
+```{r session_info}
+sessionInfo()
+```

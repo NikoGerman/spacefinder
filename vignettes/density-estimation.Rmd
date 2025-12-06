@@ -1,0 +1,198 @@
+---
+title: "Beta Density Estimation"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Beta Density Estimation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+```{r setup}
+library(spacefinder)
+library(data.table)
+library(ggplot2)
+data("benchmark_data", package = "spacefinder")
+```
+
+## Introduction
+
+After fitting a subspace, you can add probabilistic density information using `augment()`. This fits Beta distributions to each hyperparameter dimension, allowing you to:
+
+- Sample new configurations weighted toward better regions
+- Estimate probability densities within the subspace
+- Understand which parts are most promising
+
+**Note:** `augment()` is only available for **Box** and **Polygon** learners, not Ellipsoid.
+
+## Basic Usage
+```{r fit_density}
+# Train a box learner
+task <- TaskSubspace$new(
+  data = benchmark_data,
+  target_measure = "auc",
+  hps = c("learning_rate", "max_depth")
+)
+
+learner <- LearnerSubspaceBox$new(task)
+learner$train(q_val = 0.9)
+
+# Fit beta densities
+densities <- augment(learner)
+print(densities)
+```
+
+The `augment()` function returns fitted Beta distribution parameters (α, β) for each hyperparameter.
+
+## Understanding Beta Parameters
+```{r interpret_beta}
+# Extract parameters for learning_rate
+lr_params <- densities[parameter == "learning_rate"]
+alpha <- lr_params$alpha
+beta <- lr_params$beta
+
+cat("Learning rate Beta(", alpha, ", ", beta, ")\n", sep = "")
+cat("Mode at:", (alpha - 1) / (alpha + beta - 2), "\n")
+```
+
+- **α = β = 1**: Uniform distribution (all values equally likely)
+- **α > 1, β > 1**: Peak in the interior (preferred region)
+- **α > β**: Peak toward 1 (prefers higher values in [0,1])
+- **α < β**: Peak toward 0 (prefers lower values in [0,1])
+
+## Visualizing Densities
+```{r visualize_density, fig.width=7, fig.height=4}
+# Plot beta densities
+x <- seq(0, 1, length.out = 200)
+
+plot_data <- rbindlist(lapply(densities$parameter, function(hp) {
+  params <- densities[parameter == hp]
+  data.table(
+    parameter = hp,
+    x = x,
+    density = dbeta(x, params$alpha, params$beta)
+  )
+}))
+
+ggplot(plot_data, aes(x = x, y = density)) +
+  geom_line(color = "#2E86AB", linewidth = 1) +
+  facet_wrap(~parameter, scales = "free_y") +
+  theme_minimal() +
+  labs(title = "Fitted Beta Densities",
+       subtitle = "Higher density = more promising region",
+       x = "Normalized position in subspace [0,1]",
+       y = "Density")
+```
+
+Higher density indicates regions where good configurations are more concentrated.
+
+## Sampling New Configurations
+
+You can sample from the fitted distributions to generate new hyperparameter configurations:
+```{r sampling}
+set.seed(123)
+n_samples <- 5
+
+# Get bounds
+bounds <- coef(learner)
+lr_bounds <- bounds[hyperparameter == "learning_rate"]
+depth_bounds <- bounds[hyperparameter == "max_depth"]
+
+# Sample from beta distributions (in [0,1])
+lr_params <- densities[parameter == "learning_rate"]
+depth_params <- densities[parameter == "max_depth"]
+
+samples_unit <- data.table(
+  learning_rate_unit = rbeta(n_samples, lr_params$alpha, lr_params$beta),
+  max_depth_unit = rbeta(n_samples, depth_params$alpha, depth_params$beta)
+)
+
+# Transform to original scale
+samples <- data.table(
+  learning_rate = samples_unit$learning_rate_unit * 
+    (lr_bounds$max - lr_bounds$min) + lr_bounds$min,
+  max_depth = samples_unit$max_depth_unit * 
+    (depth_bounds$max - depth_bounds$min) + depth_bounds$min
+)
+
+print(samples)
+```
+
+These sampled configurations are weighted toward the most promising regions.
+
+## Regularization
+
+By default, `augment()` uses `regularize = TRUE` to avoid U-shaped densities:
+```{r regularization}
+# With regularization (default)
+densities_reg <- augment(learner, regularize = TRUE)
+
+# Without regularization
+densities_unreg <- augment(learner, regularize = FALSE)
+
+cat("With regularization:\n")
+print(densities_reg[, .(parameter, alpha, beta)])
+
+cat("\nWithout regularization:\n")
+print(densities_unreg[, .(parameter, alpha, beta)])
+```
+
+Regularization enforces α ≥ 1 and β ≥ 1, ensuring the mode exists in the interior of [0,1].
+
+## Categorical Hyperparameters
+
+When using categorical hyperparameters, separate densities are fitted per level:
+```{r categorical}
+task_cat <- TaskSubspace$new(
+  data = benchmark_data,
+  target_measure = "auc",
+  hps = c("learning_rate", "max_depth"),
+  cat_hps = "optimizer"
+)
+
+learner_cat <- LearnerSubspaceBox$new(task_cat)
+learner_cat$train(q_val = 0.9)
+
+densities_cat <- augment(learner_cat)
+print(densities_cat)
+```
+
+Each optimizer gets its own Beta distribution parameters for each hyperparameter.
+
+## Polygon Learner
+
+`augment()` also works with Polygon learners:
+```{r polygon}
+learner_polygon <- LearnerSubspacePolygon$new(task)
+learner_polygon$train(q_val = 0.9, lambda = 0.1)
+
+densities_polygon <- augment(learner_polygon)
+print(densities_polygon)
+```
+
+The process is the same: data is transformed to the unit cube, then Beta distributions are fitted.
+
+## Summary
+
+- `augment()` adds Beta density parameters to Box and Polygon learners
+- Higher density indicates more promising regions
+- Use fitted densities to sample new configurations
+- Regularization (default) prevents U-shaped densities
+- Works with categorical hyperparameters
+
+## Next Steps
+
+- `vignette("learner-comparison")`: Compare Box, Polygon, and Ellipsoid learners
+- `vignette("categorical-hyperparameters")`: Handle categorical variables
+```{r session_info}
+sessionInfo()
+```
