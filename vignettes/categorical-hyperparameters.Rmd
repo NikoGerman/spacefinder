@@ -1,0 +1,164 @@
+---
+title: "Working with Categorical Hyperparameters"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Working with Categorical Hyperparameters}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 4,
+  fig.height = 3,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+```{r setup}
+library(spacefinder)
+library(data.table)
+library(ggplot2)
+data(benchmark_data)
+```
+
+## Introduction
+
+Many hyperparameter optimization scenarios involve categorical hyperparameters like optimizer type, activation function, or kernel choice. The `spacefinder` package handles these by fitting separate subspaces for each categorical level.
+
+## The Data
+
+The `benchmark_data` includes three optimizers: SGD, Adam, and RMSprop. Let's explore how they differ:
+```{r explore_optimizers}
+# Performance by optimizer
+benchmark_data[, .(
+  mean_auc = mean(auc),
+  median_auc = median(auc),
+  sd_auc = sd(auc),
+  max_auc = max(auc),
+  n = .N
+), by = optimizer]
+
+# Visualize distributions
+ggplot(benchmark_data, aes(x = auc, fill = optimizer)) +
+  geom_density(alpha = 0.6) +
+  theme_minimal() +
+  labs(title = "AUC Distribution by Optimizer",
+       x = "AUC", y = "Density") +
+  theme(legend.position = "top")
+```
+
+Notice that Adam tends to achieve slightly higher performance than SGD and RMSprop.
+
+## Creating a Task with Categorical Hyperparameters
+
+Include the categorical hyperparameter in the task definition:
+```{r create_task}
+# Explicit specification
+task <- TaskSubspace$new(
+  data = benchmark_data,
+  target_measure = "auc",
+  hps = c("learning_rate", "max_depth"),
+  cat_hps = "optimizer"
+)
+
+# Formula interface and convenience function
+task <- as_task_subspace(
+  data = benchmark_data,
+  formula = auc ~ (learning_rate + max_depth) * optimizer
+)
+```
+
+The `* optimizer` in the formula indicates that separate subspaces should be fitted for each optimizer type.
+
+## Fitting Separate Subspaces
+
+Train a learner - it will automatically fit one subspace per optimizer:
+```{r train_learner}
+learner <- LearnerSubspaceBox$new(task)
+learner$train(q_val = 0.9)
+```
+
+## Examining Results per Category
+
+### Coefficients
+
+The coefficients now show separate bounds for each optimizer:
+```{r coef}
+bounds <- coef(learner)
+print(bounds)
+```
+
+Notice how different optimizers have different optimal ranges!
+```{r compare_bounds}
+# Compare learning rate ranges
+bounds[hyperparameter == "learning_rate"] |>
+  ggplot(aes(optimizer, color = optimizer)) +
+  geom_errorbar(aes(ymin = min, ymax = max), width = 0.2, linewidth = 1) +
+  scale_y_log10() +
+  theme_minimal() +
+  labs(title = "Optimal Learning Rate Range by Optimizer",
+       y = "Learning Rate (log scale)", x = "Optimizer") +
+  theme(legend.position = "none")
+```
+
+### Summary
+
+The summary shows fitting statistics for each optimizer:
+```{r summary}
+summary(learner)
+```
+
+Each optimizer gets its own row in the status table, showing:
+- Number of observations used
+- Performance across tasks
+
+### Visualization
+
+The autoplot function creates separate visualizations for each optimizer:
+```{r visualize}
+lapply(autoplot(learner), \(plot) plot + scale_x_continuous(limits = c(0, .01)))
+```
+
+Each panel shows:
+- The fitted subspace for that optimizer
+- Top configurations for that optimizer (orange crosses)
+- All configurations for that optimizer (gray points)
+
+## Comparing Optimizers
+
+Let's analyze the differences between optimizers:
+```{r compare_subspaces}
+# Extract top configs per optimizer
+top_configs_summary <- learner$top_configs[, .(
+  mean_lr = mean(learning_rate),
+  median_lr = median(learning_rate),
+  mean_depth = mean(max_depth),
+  median_depth = median(max_depth),
+  mean_auc = mean(auc),
+  n = .N
+), by = optimizer]
+
+print(top_configs_summary)
+```
+```{r visualize_comparison, fig.width=8, fig.height=5}
+# Scatter plot colored by optimizer
+ggplot(learner$top_configs, aes(x = learning_rate, y = max_depth, 
+                                 color = optimizer, shape = optimizer)) +
+  geom_point(size = 2, alpha = 0.7) +
+  scale_x_log10() +
+  theme_minimal() +
+  labs(title = "Top Configurations by Optimizer",
+       x = "Learning Rate (log scale)", y = "Max Depth") +
+  theme(legend.position = "top")
+```
+
+## Next Steps
+
+- **`vignette("learner-comparison")`**: Compare Box, Polygon, and Ellipsoid learners
+- **`vignette("density-estimation")`**: Add probabilistic density with `augment()`
+```{r session_info}
+sessionInfo()
+```

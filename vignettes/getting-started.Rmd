@@ -1,0 +1,129 @@
+---
+title: "Getting Started with spacefinder"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with spacefinder}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5,
+  warning = FALSE,
+  message = FALSE
+)
+```
+```{r setup}
+library(spacefinder)
+library(data.table)
+library(ggplot2)
+set.seed(42)
+```
+
+## Introduction
+
+The `spacefinder` package helps you identify promising hyperparameter subspaces from benchmark data. Instead of exploring the entire hyperparameter space, you can focus on regions that consistently produce high-performing models.
+
+## Example Data
+
+## Example Data
+
+We'll use the included `benchmark_data` dataset, which contains synthetic hyperparameter tuning results:
+```{r load_data}
+data("benchmark_data", package = "spacefinder")
+head(benchmark_data)
+
+# Summary statistics
+summary(benchmark_data$auc)
+cat("\nConfigurations with AUC > 0.9:", sum(benchmark_data$auc > 0.9), "\n")
+```
+
+The dataset includes:
+- 5 tasks (different datasets)
+- 200 configurations per task
+- Hyperparameters: `learning_rate`, `max_depth`, `optimizer`
+- Performance: `auc` (Area Under ROC Curve)
+
+## Creating a Task
+
+Define a subspace task specifying the data, target measure, and hyperparameters:
+```{r create_task}
+task <- TaskSubspace$new(
+  data = benchmark_data,
+  target_measure = "auc",
+  hps = c("learning_rate", "max_depth")
+)
+
+# Alternative: formula interface
+task <- TaskSubspace$new(
+  data = benchmark_data,
+  formula = auc ~ (learning_rate + max_depth)
+)
+```
+
+## Training a Learner
+
+We'll use the Box learner, which fits axis-aligned hyperrectangles (simple bounds per hyperparameter):
+```{r train_learner}
+# Initialize learner
+learner <- LearnerSubspaceBox$new(task)
+
+# Train on top 10% of configurations
+learner$train(q_val = 0.9)
+```
+
+The `q_val = 0.9` parameter means we use only configurations with performance above the 90th percentile (top 10%) for each task.
+
+## Extracting Results
+
+### Coefficients
+
+Get the fitted hyperparameter bounds:
+```{r coef}
+bounds <- coef(learner)
+print(bounds)
+```
+
+The learned optimal ranges:
+- `learning_rate`: between `r sprintf("%.4f", bounds$min[1])` and `r sprintf("%.4f", bounds$max[1])`
+- `max_depth`: between `r bounds$min[2]` and `r bounds$max[2]`
+
+### Summary
+
+Get a comprehensive overview:
+```{r summary}
+summary(learner)
+```
+
+The summary shows:
+- **Summary**: Task information
+- **Coefficients**: Fitted bounds
+- **Status**: Number of observations used for fitting
+
+### Visualization
+
+Visualize the fitted subspace:
+```{r visualize, fig.width=8, fig.height=6}
+autoplot(learner)
+```
+
+The plot shows:
+- **Blue rectangle**: Fitted subspace bounds
+- **Orange crosses**: Top-performing configurations used for fitting
+- **Gray points**: All configurations (background)
+
+## Next Steps
+
+Learn more about spacefinder:
+
+- **`vignette("categorical-hyperparameters")`**: Handle categorical variables (e.g., optimizers)
+- **`vignette("learner-comparison")`**: Compare Box, Polygon, and Ellipsoid learners
+- **`vignette("density-estimation")`**: Add probabilistic density with `augment()`
+
+## Session Info
+```{r session_info}
+sessionInfo()
+```
