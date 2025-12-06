@@ -7,12 +7,12 @@ test_that("basic tests", {
       hp1 = rnorm(300),
       hp2 = rnorm(300),
       hp3 = rnorm(300),
-      cat_hp = sample(c("A", "B"), 300, replace = TRUE)
+      CH = sample(c("A", "B"), 300, replace = TRUE)
     )
   )
 
-  tsk <- as_task_subspace(DT, formula = auc ~ (hp1 + hp2 + hp3) * cat_hp)
-  learner <- LearnerSubspaceElips$new(tsk)
+  tsk <- as_task_subspace(DT, formula = auc ~ (hp1 + hp2 + hp3) * CH)
+  learner <- LearnerSubspaceEllipsoid$new(tsk)
   expect_error(autoplot(learner))
 
   learner$train()

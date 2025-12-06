@@ -11,9 +11,9 @@ test_that("basic tests", {
   )
 
   tsk <- as_task_subspace(DT, formula = auc ~ (hp1 + hp2) * cat_hp)
-  learner <- LearnerSubspaceElips$new(tsk)
+  learner <- LearnerSubspaceEllipsoid$new(tsk)
   expect_true(inherits(learner, "LearnerSubspace"))
-  expect_true(inherits(learner, "LearnerSubspaceElips"))
+  expect_true(inherits(learner, "LearnerSubspaceEllipsoid"))
 
   learner$train()
   expect_true(!is.null(learner$result))
