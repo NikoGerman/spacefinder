@@ -2,15 +2,102 @@
 % Please edit documentation in R/summary_LearnerSubspace.R
 \name{summary.LearnerSubspace}
 \alias{summary.LearnerSubspace}
-\title{summary method for LearnerSubspace}
+\title{Summarize fitted subspace learner}
 \usage{
 \method{summary}{LearnerSubspace}(object, ...)
 }
 \arguments{
-\item{object}{a object which inherits from LearnerSubspace}
+\item{object}{A trained \code{LearnerSubspace} object (or subclass) with fitted
+subspace parameters}
 
-\item{...}{Additional arguments (unused)}
+\item{...}{Additional arguments (currently unused)}
+}
+\value{
+Invisibly returns a list with components:
+\itemize{
+\item \code{status}: \code{data.table} with optimization status, objective
+values, number of violations, and observation counts
+\item \code{coefficients}: \code{data.table} with fitted subspace parameters
+(format depends on learner type)
+\item \code{outliers}: \code{data.table} with outlier configurations (empty
+if no outliers or \code{lambda = NULL})
+}
 }
 \description{
-summary method for LearnerSubspace
+Provides a comprehensive summary of a trained subspace learner, including
+task information, fitted coefficients, optimization status, and outlier
+configurations. Prints formatted tables to the console and invisibly returns
+the summary information.
+}
+\details{
+\strong{Printed Output:}
+
+The function prints three formatted tables:
+
+\strong{1. Summary Table:}
+\itemize{
+\item Target measure being optimized
+\item Numeric hyperparameters included in subspace
+\item Categorical hyperparameters (if any)
+}
+
+\strong{2. Coefficients Table:}
+\itemize{
+\item \strong{Box}: min/max bounds per hyperparameter
+\item \strong{Polygon/Ellipsoid}: A matrices and b vectors in list columns
+\item Separate rows for each categorical level (if applicable)
+}
+
+\strong{3. Status Table:}
+\itemize{
+\item \code{status}: Solver convergence status (e.g., "optimal", "solved")
+\item \code{objective_value}: Final objective function value
+\item \code{n_violations}: Number of configurations treated as outliers
+\item \code{observations}: Number of top configurations used for fitting
+}
+
+\strong{Status Values:}
+
+Fields may be \code{NULL} when:
+\itemize{
+\item \code{lambda = NULL}: Simple min/max fitting (Box learner only)
+\item No outliers: All configurations fit within subspace
+}
+
+\strong{Dependencies:}
+
+Requires \code{knitr} package for formatted table output. If not available,
+falls back to basic printing.
+}
+\examples{
+\dontrun{
+# Train learner
+task <- TaskSubspace$new(data, target_measure = "auc",
+                         hps = c("learning_rate", "max_depth"))
+learner <- LearnerSubspaceBox$new(task)
+learner$train(q_val = 0.9, lambda = 0.1)
+
+# Print summary to console
+summary(learner)
+
+# Capture summary information
+info <- summary(learner)
+print(info$status)
+print(info$coefficients)
+print(info$outliers)
+
+# With categorical hyperparameters
+task <- TaskSubspace$new(data, target_measure = "auc",
+                         hps = c("learning_rate", "max_depth"),
+                         cat_hps = "optimizer")
+learner <- LearnerSubspaceBox$new(task)
+learner$train(q_val = 0.9, lambda = 0.1)
+summary(learner)  # Separate status rows per optimizer
+}
+
+}
+\seealso{
+\code{\link{LearnerSubspace}} for the base learner class.
+Methods \code{coef()} and \code{augment()} for extracting fitted parameters.
+\code{\link{outliers}} for extracting outlier configurations.
 }

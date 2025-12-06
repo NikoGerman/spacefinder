@@ -2,13 +2,38 @@
 % Please edit documentation in R/as_task_subspace.R
 \name{as_task_subspace}
 \alias{as_task_subspace}
-\title{sugar function to create new TaskSubspace}
+\title{Create a subspace task}
 \usage{
 as_task_subspace(...)
 }
 \arguments{
-\item{...}{arguments passed to TaskSubsapce$new()}
+\item{...}{Arguments passed to \code{\link{TaskSubspace}$new()}. See
+\code{\link{TaskSubspace}} for details on available parameters.}
+}
+\value{
+A \code{TaskSubspace} object
 }
 \description{
-sugar function to create new TaskSubspace
+Convenience function to create a \code{TaskSubspace} object. This is a
+wrapper around \code{TaskSubspace$new()}.
+}
+\examples{
+\dontrun{
+# Explicit specification
+task <- as_task_subspace(
+  data = benchmark_data,
+  target_measure = "auc",
+  hps = c("learning_rate", "max_depth")
+)
+
+# Formula interface
+task <- as_task_subspace(
+  data = benchmark_data,
+  formula = auc ~ (learning_rate + max_depth) * optimizer
+)
+}
+
+}
+\seealso{
+\code{\link{TaskSubspace}} for full documentation and examples.
 }

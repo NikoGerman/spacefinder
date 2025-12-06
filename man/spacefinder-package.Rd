@@ -4,9 +4,30 @@
 \name{spacefinder-package}
 \alias{spacefinder}
 \alias{spacefinder-package}
-\title{spacefinder: Find Promising Subspaces Within The Hyperparameter Space}
+\title{spacefinder: Subspace Learning for Hyperparameter Optimization}
 \description{
-Uses historic multi-instance data to identify hyper-rectangles or hyper-ellipsoids in the hyperparameter space.
+Learn promising hyperparameter subspaces from benchmark data using
+geometric methods. The package provides learners for fitting axis-aligned
+hyperrectangles, oriented hyperrectangles, and ellipsoids to high-performing
+hyperparameter configurations.
+}
+\details{
+\strong{Main Components:}
+\itemize{
+\item \code{\link{TaskSubspace}}: Define hyperparameter optimization tasks
+\item \code{\link{LearnerSubspaceBox}}: Fit axis-aligned hyperrectangles
+\item \code{\link{LearnerSubspacePolygon}}: Fit oriented hyperrectangles
+\item \code{\link{LearnerSubspaceEllipsoid}}: Fit ellipsoids
+}
+
+\strong{Key Methods:}
+\itemize{
+\item \code{train()}: Fit subspace to top-performing configurations
+\item \code{coef()}: Extract fitted subspace parameters
+\item \code{augment()}: Add beta density parameters
+\item \code{autoplot()}: Visualize fitted subspaces
+\item \code{outliers()}: Extract outlier configurations
+}
 }
 \author{
 \strong{Maintainer}: Nikolai German \email{niko.german@gmail.com} (\href{https://orcid.org/0009-0001-7394-8367}{ORCID})

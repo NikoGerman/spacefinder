@@ -2,11 +2,103 @@
 % Please edit documentation in R/LearnerSubspaceBox.R
 \name{LearnerSubspaceBox}
 \alias{LearnerSubspaceBox}
-\title{LearnerSubspaceBox class}
+\title{Axis-aligned hyperrectangle subspace learner}
 \description{
-LearnerSubspaceBox class
+Learns axis-aligned hyperrectangles (boxes with edges parallel to coordinate
+axes) that contain high-quality hyperparameter configurations.
+}
+\details{
+\strong{Geometry:}
 
-LearnerSubspaceBox class
+Fits a hyperrectangle defined by independent bounds per dimension:
+\deqn{S = \{x \in \mathbb{R}^p : l_i \leq x_i \leq u_i\}}
+
+The transformation to unit hypercube is \eqn{y = Ax + b} where:
+\itemize{
+\item \eqn{A = \text{diag}(1/(u_i - l_i))} is diagonal (independent scaling)
+\item \eqn{b = -l/(u - l)} is the translation vector
+\item \eqn{x \in [l, u]} are points in the fitted subspace
+\item \eqn{y \in [0, 1]^p} are points in the unit hypercube
+}
+
+\strong{Optimization (\code{lambda} specified):}
+\deqn{\min_{l,u,\xi} \frac{\lambda}{2}\|u-l\|_2^2 + \frac{1}{2n}\sum_t(\xi_t^- + \xi_t^+)}
+subject to: \eqn{l - \xi_t^- \leq x^{(t)} \leq u + \xi_t^+}, \eqn{\xi_t^-, \xi_t^+ \geq 0}
+
+Regularization parameter \eqn{\lambda} controls subspace size: larger values
+produce smaller subspaces with more outliers. Slack variables \eqn{\xi_t^-, \xi_t^+}
+allow configurations to violate bounds.
+
+Uses ECOS solver. Special handling for univariate case (\eqn{p=1}).
+
+\strong{Simple mode (\code{lambda = NULL}):}
+
+Uses coordinate-wise min/max: \eqn{l_i = \min_t x_i^{(t)}}, \eqn{u_i = \max_t x_i^{(t)}}
+
+No outliers are possible in this mode (hard constraints).
+
+\strong{Key Properties:}
+\itemize{
+\item Most interpretable: bounds directly specify valid ranges
+\item Fastest: O(np) with diagonal matrices
+\item Best for independent hyperparameters
+\item Cannot capture correlations between hyperparameters
+\item Transformation matrix A is always diagonal
+}
+
+\strong{Comparison with other learners:}
+\itemize{
+\item \strong{Box}: Axis-aligned only, fastest, most interpretable
+\item \strong{Polygon}: Can rotate (L-infinity norm), maintains sharp corners
+\item \strong{Ellipsoid}: Can rotate (L2 norm), smooth boundaries, most flexible
+}
+}
+\examples{
+\dontrun{
+# Create task and learner
+task <- TaskSubspace$new(data, target_measure = "accuracy",
+                         hps = c("learning_rate", "max_depth"))
+learner <- LearnerSubspaceBox$new(task)
+
+# Simple min/max bounds (no regularization)
+learner$train(q_val = 0.9, lambda = NULL)
+coef(learner)
+
+# Regularized optimization
+learner$train(q_val = 0.9, lambda = 0.1)
+result <- learner$result
+print(result$coefficients)  # Bounds per hyperparameter
+print(result$n_violations)  # Number of outliers
+print(result$outliers)      # Outlier indices
+
+# With categorical hyperparameters
+task <- TaskSubspace$new(data, target_measure = "accuracy",
+                         hps = c("learning_rate", "max_depth"),
+                         cat_hps = "optimizer")
+learner <- LearnerSubspaceBox$new(task)
+learner$train(q_val = 0.95, lambda = 0.05)
+coef(learner)  # Returns separate bounds per optimizer
+
+# Get transformation matrices (y = Ax + b)
+coef(learner, vectorize = TRUE)  # Returns A (diagonal), b
+
+# Check which configs are in the subspace
+bounds <- coef(learner)
+in_subspace <- learner$task$data[
+  learning_rate >= bounds[hyperparameter == "learning_rate"]$min &
+  learning_rate <= bounds[hyperparameter == "learning_rate"]$max &
+  max_depth >= bounds[hyperparameter == "max_depth"]$min &
+  max_depth <= bounds[hyperparameter == "max_depth"]$max
+]
+}
+
+}
+\seealso{
+\code{\link{LearnerSubspace}} for inherited methods and general workflow.
+\code{\link{LearnerSubspacePolygon}} for oriented hyperrectangles.
+\code{\link{LearnerSubspaceEllipsoid}} for ellipsoids.
+\code{\link{coef.LearnerSubspaceBox}} for extracting fitted parameters.
+\code{\link{augment.LearnerSubspaceBox}} for adding density parameters.
 }
 \section{Super class}{
 \code{\link[spacefinder:LearnerSubspace]{spacefinder::LearnerSubspace}} -> \code{LearnerSubspaceBox}

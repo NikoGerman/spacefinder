@@ -2,23 +2,112 @@
 % Please edit documentation in R/TaskSubspace.R
 \name{TaskSubspace}
 \alias{TaskSubspace}
-\title{TaskSubspace class}
+\title{Subspace task definition}
 \description{
-TaskSubspace class
+R6 class for defining hyperparameter optimization tasks. Encapsulates
+benchmark data with hyperparameter configurations and performance measures,
+providing a standardized interface for subspace learners.
+}
+\details{
+\strong{Overview:}
 
-TaskSubspace class
+A subspace task combines:
+\itemize{
+\item Benchmark data with hyperparameter configurations and performance measures
+\item Specification of which columns are hyperparameters (continuous and categorical)
+\item Target performance measure to optimize
+}
+
+\strong{Data Requirements:}
+
+The input \code{data.table} must contain:
+\itemize{
+\item A \code{task} column identifying different tasks/datasets
+\item A target measure column (e.g., "auc", "accuracy", "rmse")
+\item One or more numeric hyperparameter columns
+\item Optionally, one categorical hyperparameter column
+}
+
+\strong{Initialization Modes:}
+
+\strong{Mode 1: Explicit specification}
+\preformatted{
+task <- TaskSubspace$new(
+  data = benchmark_data,
+  target_measure = "accuracy",
+  hps = c("learning_rate", "max_depth"),
+  cat_hps = "optimizer"
+)
+}
+
+\strong{Mode 2: Formula interface}
+\preformatted{
+task <- TaskSubspace$new(
+  data = benchmark_data,
+  formula = accuracy ~ (learning_rate + max_depth) * optimizer
+)
+}
+
+The formula syntax is: \code{target ~ (hp1 + hp2 + ...) * cat_hp}
+\itemize{
+\item Left-hand side: target measure
+\item Right-hand side before \code{*}: continuous hyperparameters
+\item Right-hand side after \code{*}: categorical hyperparameter (optional)
+}
+
+\strong{Categorical Hyperparameters:}
+
+Currently supports at most one categorical hyperparameter. When specified,
+learners will fit separate subspaces for each categorical level.
+}
+\examples{
+\dontrun{
+# Explicit specification
+task <- TaskSubspace$new(
+  data = benchmark_data,
+  target_measure = "auc",
+  hps = c("learning_rate", "max_depth", "min_samples_split")
+)
+
+# With categorical hyperparameter
+task <- TaskSubspace$new(
+  data = benchmark_data,
+  target_measure = "accuracy",
+  hps = c("learning_rate", "max_depth"),
+  cat_hps = "optimizer"
+)
+
+# Formula interface
+task <- TaskSubspace$new(
+  data = benchmark_data,
+  formula = auc ~ (learning_rate + max_depth) * optimizer
+)
+
+# Use with learner
+learner <- LearnerSubspaceBox$new(task)
+learner$train(q_val = 0.9)
+}
+
+}
+\seealso{
+\code{\link{LearnerSubspace}} for the base learner class.
+\code{\link{LearnerSubspaceBox}} for axis-aligned hyperrectangles.
+\code{\link{LearnerSubspacePolygon}} for oriented hyperrectangles.
+\code{\link{LearnerSubspaceEllipsoid}} for ellipsoids.
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
-\item{\code{data}}{A data table, containing hyperparameter and a target measure.
-needs to have a column named 'task'.}
+\item{\code{data}}{A \code{data.table} containing hyperparameter configurations,
+performance measures, and task identifiers. Must have a \code{task} column.}
 
-\item{\code{target_measure}}{a character string: the target metric (e.g. auc, mce, brier loss,...)}
+\item{\code{target_measure}}{Character string specifying the performance measure
+column name (e.g., "auc", "accuracy", "rmse")}
 
-\item{\code{hps}}{One or more numeric hyperparameters}
+\item{\code{hps}}{Character vector of continuous hyperparameter column names}
 
-\item{\code{cat_hps}}{currently up to one categorical hyperparamter}
+\item{\code{cat_hps}}{Character string specifying the categorical hyperparameter
+column name (optional, currently limited to one)}
 }
 \if{html}{\out{</div>}}
 }
@@ -33,6 +122,7 @@ needs to have a column named 'task'.}
 \if{html}{\out{<a id="method-TaskSubspace-new"></a>}}
 \if{latex}{\out{\hypertarget{method-TaskSubspace-new}{}}}
 \subsection{Method \code{new()}}{
+Create a new task instance
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{TaskSubspace$new(
   data,
@@ -48,7 +138,7 @@ needs to have a column named 'task'.}
 \describe{
 \item{\code{data}}{A data.table containing task performance data}
 
-\item{\code{formula}}{target_measure ~ (hp1 + hp2 + ...) * (cat_hp1 + cat_hp2 + ...) (optional)}
+\item{\code{formula}}{Formula specification (optional)}
 
 \item{\code{target_measure}}{Name of the performance measure column}
 

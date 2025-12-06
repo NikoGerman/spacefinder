@@ -2,15 +2,94 @@
 % Please edit documentation in R/outliers_LearnerSubspace.R
 \name{outliers}
 \alias{outliers}
-\title{outliers method for learners inheriting from LearnerSubspace}
+\title{Extract outlier configurations}
 \usage{
 outliers(object, ...)
 }
 \arguments{
-\item{object}{An object inheriting from LearnerSubspace}
+\item{object}{A trained \code{LearnerSubspace} object (or subclass) with fitted
+subspace parameters}
 
-\item{...}{Additional arguments (unused)}
+\item{...}{Additional arguments (currently unused)}
+}
+\value{
+A \code{data.table} containing the outlier configurations with all
+columns from the original task data. Returns an empty \code{data.table} if
+no outliers were identified. A message is printed when no outliers exist.
 }
 \description{
-outliers method for learners inheriting from LearnerSubspace
+Extracts hyperparameter configurations identified as outliers during subspace
+fitting. Outliers are configurations that violated the subspace constraints and
+were excluded via slack variables during regularized optimization.
+}
+\details{
+\strong{When Outliers Exist:}
+
+Outliers are only identified when training with \code{lambda > 0}. The
+regularization parameter allows the optimization to exclude some configurations
+from the fitted subspace by introducing slack variables.
+
+For a configuration to be considered an outlier, its slack variable must exceed
+the threshold of \eqn{10^{-5}}.
+
+When \code{lambda = NULL}, all configurations are forced to fit within the
+subspace (hard constraints), so no outliers exist.
+
+\strong{Categorical Hyperparameters:}
+
+When the task includes categorical hyperparameters, outliers are identified
+separately for each categorical level and combined in the returned \code{data.table}.
+
+\strong{Interpretation:}
+
+Outliers typically represent:
+\itemize{
+\item Configurations in sparse regions of hyperparameter space
+\item Anomalous configurations with unusual performance
+\item Configurations that don't fit the dominant subspace pattern
+}
+
+The number and characteristics of outliers can guide decisions about:
+\itemize{
+\item Adjusting the \code{lambda} parameter
+\item Investigating unusual configurations
+\item Understanding the geometry of high-performing regions
+}
+}
+\examples{
+\dontrun{
+# Train with regularization (allows outliers)
+task <- TaskSubspace$new(data, target_measure = "auc",
+                         hps = c("learning_rate", "max_depth"))
+learner <- LearnerSubspaceBox$new(task)
+learner$train(q_val = 0.9, lambda = 0.1)
+
+# Extract outliers
+outlier_configs <- outliers(learner)
+print(nrow(outlier_configs))  # Number of outliers
+print(outlier_configs)  # View outlier configurations
+
+# Check outlier information from result
+print(learner$result$n_violations)  # Total number of outliers
+print(learner$result$outliers)  # Outlier indices
+
+# Train without regularization (no outliers)
+learner$train(q_val = 0.9, lambda = NULL)
+outlier_configs <- outliers(learner)  # Returns empty data.table
+
+# With categorical hyperparameters
+task <- TaskSubspace$new(data, target_measure = "auc",
+                         hps = c("learning_rate", "max_depth"),
+                         cat_hps = "optimizer")
+learner <- LearnerSubspaceBox$new(task)
+learner$train(q_val = 0.9, lambda = 0.1)
+outlier_configs <- outliers(learner)  # Combined across all levels
+}
+
+}
+\seealso{
+\code{\link{LearnerSubspace}} for the base learner class.
+\code{\link{LearnerSubspaceBox}} for axis-aligned hyperrectangles.
+\code{\link{LearnerSubspacePolygon}} for oriented hyperrectangles.
+\code{\link{LearnerSubspaceEllipsoid}} for ellipsoids.
 }
