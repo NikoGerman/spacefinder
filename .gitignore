@@ -6,3 +6,7 @@
 .DS_Store
 .quarto
 dev/
+data-raw/
+inst/doc
+/doc/
+/Meta/

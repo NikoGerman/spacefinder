@@ -1,6 +1,6 @@
 Package: spacefinder
 Title: Find Promising Subspaces Within The Hyperparameter Space
-Version: 0.1.0.9000
+Version: 0.2.0.0000
 Authors@R: 
     person("Nikolai", "German", , "niko.german@gmail.com", role = c("aut", "cre"),
     comment = c(ORCID = "https://orcid.org/0009-0001-7394-8367"))
@@ -15,22 +15,27 @@ Suggests:
     ggplot2,
     patchwork,
     grDevices,
-    scales
+    scales,
+    rmarkdown
 Config/testthat/edition: 3
 Collate: 
     'LearnerSubspace.R'
     'LearnerSubspaceBox.R'
-    'LearnerSubspaceBoxGeneral.R'
-    'LearnerSubspaceElips.R'
+    'LearnerSubspaceEllipsoid.R'
+    'LearnerSubspacePolygon.R'
     'TaskSubspace.R'
     'as_task_subspace.R'
     'helper.R'
+    'augment.R'
+    'augment_LearnerSubspaceBox.R'
+    'augment_LearnerSubspacePolygon.R'
     'autoplot_LeanerSubspaceBox.R'
-    'autoplot_LearnerSubspaceBoxGeneral.R'
-    'autoplot_LearnerSubspaceElips.R'
+    'autoplot_LearnerSubspaceEllipsoid.R'
+    'autoplot_LearnerSubspacePolygon.R'
     'coef_LearnerSubspaceBox.R'
-    'coef_LearnerSubspaceBoxGeneral.R'
-    'coef_LearnerSubspaceElips.R'
+    'coef_LearnerSubspaceEllipsoid.R'
+    'coef_LearnerSubspacePolygon.R'
+    'data.R'
     'outliers_LearnerSubspace.R'
     'spacefinder-package.R'
     'summary_LearnerSubspace.R'
@@ -40,3 +45,7 @@ Imports:
     data.table,
     knitr,
     R6
+VignetteBuilder: knitr
+Depends: 
+    R (>= 3.5)
+LazyData: true
