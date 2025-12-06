@@ -3,7 +3,6 @@ output: github_document
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -18,48 +17,74 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-Spacefinder provides functionality to identify best performing minimum volume subspaces within the hyperparameter space.
+## Overview
+
+`spacefinder` identifies promising subspaces within hyperparameter spaces by fitting geometric regions (hyperrectangles and ellipsoids) to high-performing configurations from hyperparameter tuning benchmarks.
+
+**Key features:**
+
+- Three learner types: Box (axis-aligned), Polygon (oriented), and Ellipsoid
+- Handles categorical hyperparameters by fitting separate subspaces per level
+- Beta density estimation for probabilistic sampling (`augment()`)
+- Visualization tools for fitted subspaces (`autoplot()`)
+- Works with multi-task benchmark data
 
 ## Installation
 
-You can install the development version of spacefinder from [GitHub](https://github.com/) with:
-
-``` r
+Install the development version from GitHub:
+```r
 # install.packages("pak")
 pak::pak("NikoGerman/spacefinder")
 ```
 
-## Example
-
-```{r example}
+## Quick Start
+```{r example, message=FALSE}
 library(spacefinder)
 
-withr::with_seed(1, DT <- data.table::data.table(
-      task = sample(c("T1", "T2", "T3"), 300, replace = TRUE),
-      auc = sample(runif(30), 100, replace = TRUE),
-      hp1 = rnorm(300),
-      hp2 = rnorm(300),
-      hp3 = rnorm(300),
-      cat_hp = sample(c("A", "B"), 300, replace = TRUE)
-      )
-    )
+# Load example data
+data(benchmark_data)
 
-tsk <- as_task_subspace(DT, auc ~ (hp1 + hp2 + hp3) * cat_hp)
+# Create task
+task <- TaskSubspace$new(
+  data = benchmark_data,
+  target_measure = "auc",
+  hps = c("learning_rate", "max_depth")
+)
 
-learner <- LearnerSubspaceBox$new(tsk)
+# Fit axis-aligned hyperrectangle
+learner <- LearnerSubspaceBox$new(task)
+learner$train(q_val = 0.9)
 
-# train with slack
-learner$train(lambda = .05)
+# View fitted bounds
+coef(learner)
+```
+```{r plot, fig.height=5, fig.width=7}
+# Visualize fitted subspace
+ggplot2::autoplot(learner)
 ```
 
-```{r summary}
-summary(learner)
+## Documentation
+
+Learn more about spacefinder:
+
+- [Getting Started](https://nikogerman.github.io/spacefinder/articles/getting-started.html) - Basic workflow and concepts
+- [Learner Comparison](https://nikogerman.github.io/spacefinder/articles/learner-comparison.html) - Comparing Box, Polygon, and Ellipsoid learners  
+- [Categorical Hyperparameters](https://nikogerman.github.io/spacefinder/articles/categorical-hyperparameters.html) - Working with categorical variables
+- [Density Estimation](https://nikogerman.github.io/spacefinder/articles/density-estimation.html) - Probabilistic modeling with `augment()`
+
+## Citation
+
+If you use spacefinder in your research, please cite:
+```
+@Manual{,
+  title = {spacefinder: Subspace Learning for Hyperparameter Optimization},
+  author = {Nikolai German},
+  year = {2025},
+  note = {R package version 0.2.0},
+  url = {https://github.com/NikoGerman/spacefinder},
+}
 ```
 
-```{r autoplot}
-ggplot2::autoplot(learner, wrap = TRUE)$A
-```
-```{r outliers}
-outliers(learner)
-```
+## License
 
+Apache License v2.0

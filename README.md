@@ -7,84 +7,94 @@
 
 <!-- badges: end -->
 
-Spacefinder provides functionality to identify best performing minimum
-volume subspaces within the hyperparameter space.
+## Overview
+
+`spacefinder` identifies promising subspaces within hyperparameter
+spaces by fitting geometric regions (hyperrectangles and ellipsoids) to
+high-performing configurations from hyperparameter tuning benchmarks.
+
+**Key features:**
+
+- Three learner types: Box (axis-aligned), Polygon (oriented), and
+  Ellipsoid
+- Handles categorical hyperparameters by fitting separate subspaces per
+  level
+- Beta density estimation for probabilistic sampling (`augment()`)
+- Visualization tools for fitted subspaces (`autoplot()`)
+- Works with multi-task benchmark data
 
 ## Installation
 
-You can install the development version of spacefinder from
-[GitHub](https://github.com/) with:
+Install the development version from GitHub:
 
 ``` r
 # install.packages("pak")
 pak::pak("NikoGerman/spacefinder")
 ```
 
-## Example
+## Quick Start
 
 ``` r
 library(spacefinder)
 
-withr::with_seed(1, DT <- data.table::data.table(
-      task = sample(c("T1", "T2", "T3"), 300, replace = TRUE),
-      auc = sample(runif(30), 100, replace = TRUE),
-      hp1 = rnorm(300),
-      hp2 = rnorm(300),
-      hp3 = rnorm(300),
-      cat_hp = sample(c("A", "B"), 300, replace = TRUE)
-      )
-    )
+# Load example data
+data(benchmark_data)
 
-tsk <- as_task_subspace(DT, auc ~ (hp1 + hp2 + hp3) * cat_hp)
+# Create task
+task <- TaskSubspace$new(
+  data = benchmark_data,
+  target_measure = "auc",
+  hps = c("learning_rate", "max_depth")
+)
 
-learner <- LearnerSubspaceBox$new(tsk)
+# Fit axis-aligned hyperrectangle
+learner <- LearnerSubspaceBox$new(task)
+learner$train(q_val = 0.9)
 
-# train with slack
-learner$train(lambda = .05)
+# View fitted bounds
+coef(learner)
+#>    hyperparameter         min         max
+#>            <char>       <num>       <num>
+#> 1:  learning_rate 0.001746421  0.00554191
+#> 2:      max_depth 3.000000000 15.00000000
 ```
 
 ``` r
-summary(learner)
-#> SUMMARY
-#> --------------------------
-#> Property                      Value         
-#> ----------------------------  --------------
-#> Target Measure                auc           
-#> Numeric Hyperparameters       hp1, hp2, hp3 
-#> Categorical Hyperparameters   cat_hp        
-#> 
-#> 
-#> Coefficients:
-#> --------------------------
-#> cat_hp   hyperparameter           min         max
-#> -------  ---------------  -----------  ----------
-#> B        hp1                0.5606005   1.6346443
-#> B        hp2               -0.7233750   0.9644541
-#> B        hp3               -0.7424822   0.5593342
-#> A        hp1               -1.4520283   1.0479482
-#> A        hp2               -0.2085919   1.3771547
-#> A        hp3               -0.9911609   1.5088496
-#> 
-#> 
-#> Status:
-#> --------------------------
-#> cat_hp   status     objective_value   n_violations   observations
-#> -------  --------  ----------------  -------------  -------------
-#> B        optimal          0.1676549              1              4
-#> A        optimal           0.585847              2              4
+# Visualize fitted subspace
+ggplot2::autoplot(learner)
 ```
 
-``` r
-ggplot2::autoplot(learner, wrap = TRUE)$A
-```
+<img src="man/figures/README-plot-1.png" width="100%" />
 
-<img src="man/figures/README-autoplot-1.png" width="100%" />
+## Documentation
 
-``` r
-outliers(learner)
-#>      task       auc        hp1        hp2        hp3 cat_hp
-#>    <char>     <num>      <num>      <num>      <num> <char>
-#> 1:     T1 0.9937492  0.3587742 -0.9252012 -0.5814342      B
-#> 2:     T2 0.9937492 -1.5384414 -0.2950050  2.1722442      A
-#> 3:     T3 0.9543781  1.2938800 -0.1578272 -1.6792916      A
-```
+Learn more about spacefinder:
+
+- [Getting
+  Started](https://nikogerman.github.io/spacefinder/articles/getting-started.html) -
+  Basic workflow and concepts
+- [Learner
+  Comparison](https://nikogerman.github.io/spacefinder/articles/learner-comparison.html) -
+  Comparing Box, Polygon, and Ellipsoid learners  
+- [Categorical
+  Hyperparameters](https://nikogerman.github.io/spacefinder/articles/categorical-hyperparameters.html) -
+  Working with categorical variables
+- [Density
+  Estimation](https://nikogerman.github.io/spacefinder/articles/density-estimation.html) -
+  Probabilistic modeling with `augment()`
+
+## Citation
+
+If you use spacefinder in your research, please cite:
+
+    @Manual{,
+      title = {spacefinder: Subspace Learning for Hyperparameter Optimization},
+      author = {Nikolai German},
+      year = {2025},
+      note = {R package version 0.2.0},
+      url = {https://github.com/NikoGerman/spacefinder},
+    }
+
+## License
+
+Apache License v2.0
