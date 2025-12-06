@@ -3,7 +3,7 @@
 #' @description
 #' Extracts fitted subspace parameters from a trained \code{LearnerSubspaceBox}
 #' object. Returns either explicit hyperparameter bounds or the transformation
-#' matrices that map the unit hypercube to the fitted axis-aligned hyperrectangle.
+#' matrices that map the fitted axis-aligned hyperrectangle to the unit hypercube.
 #'
 #' @param object A \code{LearnerSubspaceBox} object with fitted subspace parameters
 #' @param vectorize `logical` whether to return transformation matrices (\code{TRUE})
@@ -29,22 +29,24 @@
 #'   \strong{When \code{vectorize = TRUE} (transformation matrices):}
 #'   \itemize{
 #'     \item \code{hyperparameters}: List column containing hyperparameter names
-#'     \item \code{A}: List column of diagonal matrices with \eqn{(max - min)} on diagonal
-#'     \item \code{b}: List column of translation vectors equal to \eqn{min}
+#'     \item \code{A}: List column of diagonal matrices with \eqn{1/(max - min)} on diagonal
+#'     \item \code{b}: List column of translation vectors equal to \eqn{-min/(max - min)}
 #'     \item \code{cat_hp}: Categorical level (only if task has categorical hyperparameters)
 #'   }
 #'
 #' @details
-#' For axis-aligned hyperrectangles, the transformation from unit hypercube
-#' \eqn{[0,1]^d} to the fitted subspace is:
+#' For axis-aligned hyperrectangles, the transformation from the fitted subspace
+#' to the unit hypercube \eqn{[0,1]^d} is:
 #' \deqn{y = Ax + b}
 #' where:
 #' \itemize{
-#'   \item \eqn{A = diag(max - min)} is a diagonal matrix (independent scaling per dimension)
-#'   \item \eqn{b = min} is the translation vector
-#'   \item \eqn{x \in [0,1]^d} are unit cube coordinates
-#'   \item \eqn{y} are original hyperparameter coordinates
+#'   \item \eqn{A = diag(1/(max - min))} is a diagonal matrix (independent scaling per dimension)
+#'   \item \eqn{b = -min/(max - min)} is the translation vector
+#'   \item \eqn{x \in [min, max]^d} are original hyperparameter coordinates
+#'   \item \eqn{y \in [0,1]^d} are unit cube coordinates
 #' }
+#'
+#' This maps each hyperparameter from its fitted range \eqn{[min, max]} to \eqn{[0, 1]}.
 #'
 #' When the task includes categorical hyperparameters, separate coefficient sets
 #' are returned for each categorical level, identified by the \code{cat_hp} column.
@@ -71,7 +73,7 @@
 #' coef(learner, vectorize = TRUE)
 #' }
 #'
-#' @export
+#' @exportS3Method
 coef.LearnerSubspaceBox <- function(
   object,
   vectorize = FALSE,
@@ -85,17 +87,18 @@ coef.LearnerSubspaceBox <- function(
     )
   }
   if (!is.null(object$task$cat_hps)) {
+    cat_hp <- object$task$cat_hps
     coefs <- data.table::rbindlist(
       lapply(object$result, \(x) x$coefficients),
-      idcol = object$task$cat_hps
+      idcol = cat_hp
     )
     if (vectorize) {
       return(
         coefs[,
           list(
             hyperparameters = list(hyperparameter),
-            A = list(diag(max - min)),
-            b = list(min)
+            A = list(diag(1 / (max - min))),
+            b = list(-min / (max - min))
           ),
           by = cat_hp
         ]
@@ -109,8 +112,8 @@ coef.LearnerSubspaceBox <- function(
       return(
         coefs[, list(
           hyperparameters = list(hyperparameter),
-          A = list(diag(max - min)),
-          b = list(min)
+          A = list(diag(1 / (max - min))),
+          b = list(-min / (max - min))
         )]
       )
     } else {

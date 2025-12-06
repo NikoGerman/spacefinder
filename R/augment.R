@@ -22,7 +22,6 @@
 #' @seealso
 #' \code{\link{augment.LearnerSubspaceBox}} for axis-aligned hyperrectangles.
 #' \code{\link{augment.LearnerSubspacePolygon}} for oriented hyperrectangles.
-#' \code{\link{augment_subspace_learner}} for the underlying implementation.
 #'
 #' @export
 augment <- function(object, ...) {
