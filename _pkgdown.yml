@@ -1,4 +1,12 @@
 url: https://nikogerman.github.io/spacefinder/
 template:
   bootstrap: 5
+  math-rendering: mathjax
 
+home:
+  title: spacefinder
+
+navbar:
+  structure:
+    left: [home, reference, articles, news]
+    right: [search, github]
