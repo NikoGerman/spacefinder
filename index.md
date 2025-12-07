@@ -63,16 +63,18 @@ ggplot2::autoplot(learner)
 
 Learn more about spacefinder:
 
-- [`vignette("getting-started", package = "spacefinder")`](https://nikogerman.github.io/spacefinder/articles/getting-started.md) -
+- [Getting
+  Started](https://nikogerman.github.io/spacefinder/articles/getting-started.html) -
   Basic workflow and concepts
-- [`vignette("learner-comparison", package = "spacefinder")`](https://nikogerman.github.io/spacefinder/articles/learner-comparison.md) -
+- [Learner
+  Comparison](https://nikogerman.github.io/spacefinder/articles/learner-comparison.html) -
   Comparing Box, Polygon, and Ellipsoid learners  
-- [`vignette("categorical-hyperparameters", package = "spacefinder")`](https://nikogerman.github.io/spacefinder/articles/categorical-hyperparameters.md) -
+- [Categorical
+  Hyperparameters](https://nikogerman.github.io/spacefinder/articles/categorical-hyperparameters.html) -
   Working with categorical variables
-- [`vignette("density-estimation", package = "spacefinder")`](https://nikogerman.github.io/spacefinder/articles/density-estimation.md) -
+- [Density
+  Estimation](https://nikogerman.github.io/spacefinder/articles/density-estimation.html) -
   Probabilistic modeling with `augment()`
-
-Or browse online at <https://nikogerman.github.io/spacefinder/>
 
 ## Citation
 
