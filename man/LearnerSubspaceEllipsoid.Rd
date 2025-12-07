@@ -43,6 +43,9 @@ Minimizes volume without slack variables. All points must satisfy
 \item \strong{Ellipsoid}: Can rotate, smooth boundaries, most flexible, slowest
 }
 }
+\note{
+This learner does not implement an \code{augment()} method.
+}
 \examples{
 \dontrun{
 # Create task and learner

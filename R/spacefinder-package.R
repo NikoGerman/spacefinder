@@ -28,6 +28,7 @@
 #' @import CVXR
 #' @import data.table
 #' @importFrom stats coef
+#' @importFrom generics augment
 #' @importFrom R6 R6Class
 #' @importFrom checkmate assertFlag assertDataTable assertChoice assertCharacter assertNumeric
 #' @importFrom knitr kable

@@ -29,7 +29,7 @@ configurations across multiple tasks and optimizers.
 \details{
 The data simulates realistic hyperparameter tuning scenarios where:
 \itemize{
-\item Performance peaks around learning_rate ≈ 0.003 and max_depth ≈ 8
+\item Performance peaks around learning_rate \eqn{0.003} and max_depth \eqn{8}
 \item Adam optimizer provides slight performance boost over SGD and RMSprop
 \item Each task has slight performance variations
 \item Most configurations are mediocre, with excellent performance being rare

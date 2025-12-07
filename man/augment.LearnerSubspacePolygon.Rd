@@ -4,10 +4,10 @@
 \alias{augment.LearnerSubspacePolygon}
 \title{Augment oriented hyperrectangle learner with beta densities}
 \usage{
-\method{augment}{LearnerSubspacePolygon}(object, regularize = TRUE, ...)
+\method{augment}{LearnerSubspacePolygon}(x, regularize = TRUE, ...)
 }
 \arguments{
-\item{object}{A \code{LearnerSubspacePolygon} object with fitted subspace parameters}
+\item{x}{A \code{LearnerSubspacePolygon} object with fitted subspace parameters}
 
 \item{regularize}{Logical indicating whether to enforce \code{alpha >= 1} and
 \code{beta >= 1} to avoid U-shaped densities. Default: \code{TRUE}}

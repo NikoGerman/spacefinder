@@ -4,10 +4,10 @@
 \alias{augment.LearnerSubspaceBox}
 \title{Augment axis-aligned box learner with beta densities}
 \usage{
-\method{augment}{LearnerSubspaceBox}(object, regularize = TRUE, ...)
+\method{augment}{LearnerSubspaceBox}(x, regularize = TRUE, ...)
 }
 \arguments{
-\item{object}{A \code{LearnerSubspaceBox} object with fitted subspace parameters}
+\item{x}{A \code{LearnerSubspaceBox} object with fitted subspace parameters}
 
 \item{regularize}{Logical indicating whether to enforce \code{alpha >= 1} and
 \code{beta >= 1} to avoid U-shaped densities. Default: \code{TRUE}}

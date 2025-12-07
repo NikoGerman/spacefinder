@@ -7,7 +7,7 @@
 #' norm, so the fitted subspace is \eqn{\|Ax + b\|_\infty \leq 1}, which maps to
 #' \eqn{[-1, 1]^d} before being rescaled to \eqn{[0, 1]^d} for beta fitting.
 #'
-#' @param object A \code{LearnerSubspacePolygon} object with fitted subspace parameters
+#' @param x A \code{LearnerSubspacePolygon} object with fitted subspace parameters
 #' @param regularize Logical indicating whether to enforce \code{alpha >= 1} and
 #'   \code{beta >= 1} to avoid U-shaped densities. Default: \code{TRUE}
 #' @param ... Additional arguments passed to \code{\link{fit_beta_mle_single}}
@@ -84,32 +84,32 @@
 #' }
 #'
 #' @exportS3Method
-augment.LearnerSubspacePolygon <- function(object, regularize = TRUE, ...) {
-  if (is.null(object$result)) {
+augment.LearnerSubspacePolygon <- function(x, regularize = TRUE, ...) {
+  if (is.null(x$result)) {
     stop(
       "Learner has not been trained. Use train() method first.",
       call. = FALSE
     )
   }
 
-  data <- object$task$data
-  coefs <- coef(object)
-  cat_hps <- object$task$cat_hps
+  data <- x$task$data
+  coefs <- coef(x)
+  cat_hps <- x$task$cat_hps
 
   # Helper function to fit beta densities for one level
   fit_level <- function(level_data, hps, A, b, w) {
     # Normalize weights
     w <- w / sum(w)
 
-    # Transform to [-1, 1]^d: z = Ax + b
+    # Transform to [-1, 1]^d: z = Ay + b
     y <- as.matrix(level_data[, mget(hps)])
     z <- sweep(t(A %*% t(y)), 2, b, FUN = `+`)
 
-    # Rescale from [-1, 1] to [0, 1]: x = (z + 1) / 2
-    x <- (z + 1) / 2
+    # Rescale from [-1, 1] to [0, 1]: z = (z + 1) / 2
+    z <- (z + 1) / 2
 
     # Create data.table with transformed coordinates
-    DT <- data.table::as.data.table(x)
+    DT <- data.table::as.data.table(z)
     data.table::setnames(DT, hps)
     DT[, w := w]
 
@@ -161,7 +161,7 @@ augment.LearnerSubspacePolygon <- function(object, regularize = TRUE, ...) {
         hps = coef_row$hyperparameters[[1]],
         A = coef_row$A[[1]],
         b = coef_row$b[[1]],
-        w = data[get(cat_hps) == lvl, get(object$task$target_measure)]
+        w = data[get(cat_hps) == lvl, get(x$task$target_measure)]
       )[, (cat_hps) := lvl]
     }))
   } else {
@@ -170,7 +170,7 @@ augment.LearnerSubspacePolygon <- function(object, regularize = TRUE, ...) {
       hps = coefs$hyperparameters[[1]],
       A = coefs$A[[1]],
       b = coefs$b[[1]],
-      w = data[[object$task$target_measure]]
+      w = data[[x$task$target_measure]]
     )
   }
 }

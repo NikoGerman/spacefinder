@@ -29,6 +29,13 @@ hyperparameter configurations.
 \item \code{outliers()}: Extract outlier configurations
 }
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://nikogerman.github.io/spacefinder/}
+}
+
+}
 \author{
 \strong{Maintainer}: Nikolai German \email{niko.german@gmail.com} (\href{https://orcid.org/0009-0001-7394-8367}{ORCID})
 

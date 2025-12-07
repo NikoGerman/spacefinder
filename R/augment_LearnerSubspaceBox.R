@@ -6,7 +6,7 @@
 #' using weighted maximum likelihood estimation. Since box learners use diagonal
 #' transformation matrices (independent scaling), inversion is computationally efficient.
 #'
-#' @param object A \code{LearnerSubspaceBox} object with fitted subspace parameters
+#' @param x A \code{LearnerSubspaceBox} object with fitted subspace parameters
 #' @param regularize Logical indicating whether to enforce \code{alpha >= 1} and
 #'   \code{beta >= 1} to avoid U-shaped densities. Default: \code{TRUE}
 #' @param ... Additional arguments passed to \code{\link{fit_beta_mle_single}}
@@ -82,29 +82,29 @@
 #' }
 #'
 #' @exportS3Method
-augment.LearnerSubspaceBox <- function(object, regularize = TRUE, ...) {
-  if (is.null(object$result)) {
+augment.LearnerSubspaceBox <- function(x, regularize = TRUE, ...) {
+  if (is.null(x$result)) {
     stop(
       "Learner has not been trained. Use train() method first.",
       call. = FALSE
     )
   }
 
-  data <- object$task$data
-  coefs <- coef(object, vectorize = TRUE)
-  cat_hps <- object$task$cat_hps
+  data <- x$task$data
+  coefs <- coef(x, vectorize = TRUE)
+  cat_hps <- x$task$cat_hps
 
   # Helper function to fit beta densities for one level
   fit_level <- function(level_data, hps, A, b, w) {
     # Normalize weights
     w <- w / sum(w)
 
-    # Transform to [-1, 0]^d: z = Ax + b
+    # Transform to [-1, 0]^d: z = Ay + b
     y <- as.matrix(level_data[, mget(hps)])
-    x <- sweep(t(A %*% t(y)), 2, b, FUN = `+`)
+    z <- sweep(t(A %*% t(y)), 2, b, FUN = `+`)
 
     # Create data.table with transformed coordinates
-    DT <- data.table::as.data.table(x)
+    DT <- data.table::as.data.table(z)
     data.table::setnames(DT, hps)
     DT[, w := w]
 
@@ -156,7 +156,7 @@ augment.LearnerSubspaceBox <- function(object, regularize = TRUE, ...) {
         hps = coef_row$hyperparameters[[1]],
         A = coef_row$A[[1]],
         b = coef_row$b[[1]],
-        w = data[get(cat_hps) == lvl, get(object$task$target_measure)]
+        w = data[get(cat_hps) == lvl, get(x$task$target_measure)]
       )[, (cat_hps) := lvl]
     }))
   } else {
@@ -165,7 +165,7 @@ augment.LearnerSubspaceBox <- function(object, regularize = TRUE, ...) {
       hps = coefs$hyperparameters[[1]],
       A = coefs$A[[1]],
       b = coefs$b[[1]],
-      w = data[[object$task$target_measure]]
+      w = data[[x$task$target_measure]]
     )
   }
 }

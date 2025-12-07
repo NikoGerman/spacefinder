@@ -40,6 +40,9 @@
 #'   \item \strong{Ellipsoid}: Can rotate, smooth boundaries, most flexible, slowest
 #' }
 #'
+#' @note
+#' This learner does not implement an \code{augment()} method.
+#'
 #' @seealso
 #' \code{\link{LearnerSubspace}} for inherited methods and general workflow.
 #' \code{\link{LearnerSubspaceBox}} for axis-aligned hyperrectangles (faster).
