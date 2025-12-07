@@ -1,3 +1,10 @@
+# spacefinder 0.2.1
+
+## Internal changes
+
+* Refactored to use `generics::augment()` instead of custom generic
+* `augment()` methods now properly dispatch through generics package
+
 # spacefinder 0.2.0
 
 ## Major Changes

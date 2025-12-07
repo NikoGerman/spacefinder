@@ -1,6 +1,6 @@
 Package: spacefinder
 Title: Find Promising Subspaces Within The Hyperparameter Space
-Version: 0.2.0.0000
+Version: 0.2.1.0000
 Authors@R: 
     person("Nikolai", "German", , "niko.german@gmail.com", role = c("aut", "cre"),
     comment = c(ORCID = "https://orcid.org/0009-0001-7394-8367"))
@@ -26,7 +26,6 @@ Collate:
     'TaskSubspace.R'
     'as_task_subspace.R'
     'helper.R'
-    'augment.R'
     'augment_LearnerSubspaceBox.R'
     'augment_LearnerSubspacePolygon.R'
     'autoplot_LeanerSubspaceBox.R'
@@ -43,9 +42,11 @@ Imports:
     checkmate,
     CVXR,
     data.table,
+    generics,
     knitr,
     R6
 VignetteBuilder: knitr
 Depends: 
-    R (>= 3.5)
+    R (>= 4.1.0)
 LazyData: true
+URL: https://nikogerman.github.io/spacefinder/
