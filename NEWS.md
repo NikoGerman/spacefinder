@@ -1,3 +1,9 @@
+# spacefinder (development version)
+
+## Bug Fixes
+
+* Fixed issues in `coef()` method for Box Learner when only one hyperparameter is present
+
 # spacefinder 0.2.1
 
 ## Internal changes

@@ -97,7 +97,7 @@ coef.LearnerSubspaceBox <- function(
         coefs[,
           list(
             hyperparameters = list(hyperparameter),
-            A = list(diag(1 / (max - min))),
+            A = list(diag(1 / (max - min), nrow = length(hyperparameter))),
             b = list(-min / (max - min))
           ),
           by = cat_hp
@@ -112,7 +112,7 @@ coef.LearnerSubspaceBox <- function(
       return(
         coefs[, list(
           hyperparameters = list(hyperparameter),
-          A = list(diag(1 / (max - min))),
+          A = list(diag(1 / (max - min), nrow = length(hyperparameter))),
           b = list(-min / (max - min))
         )]
       )
