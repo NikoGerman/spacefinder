@@ -1,5 +1,12 @@
 # Changelog
 
+## spacefinder (development version)
+
+### Bug Fixes
+
+- Fixed issues in [`coef()`](https://rdrr.io/r/stats/coef.html) method
+  for Box Learner when only one hyperparameter is present
+
 ## spacefinder 0.2.1
 
 ### Internal changes

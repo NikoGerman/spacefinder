@@ -267,7 +267,7 @@ sessionInfo()
 #> 
 #> other attached packages:
 #> [1] generics_0.1.4         ggplot2_4.0.1          data.table_1.17.8     
-#> [4] spacefinder_0.2.1.0000
+#> [4] spacefinder_0.2.1.9000
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] Matrix_1.7-4       bit_4.6.0          gtable_0.3.6       jsonlite_2.0.0    
