@@ -6,6 +6,9 @@
 
 - Fixed issues in [`coef()`](https://rdrr.io/r/stats/coef.html) method
   for Box Learner when only one hyperparameter is present
+- Fixed issue in [`coef()`](https://rdrr.io/r/stats/coef.html) method
+  for Box Learner with setting `vectorize = TRUE` and degenerate case,
+  where min=max.
 
 ## spacefinder 0.2.1
 
