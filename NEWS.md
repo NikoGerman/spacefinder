@@ -3,6 +3,7 @@
 ## Bug Fixes
 
 * Fixed issues in `coef()` method for Box Learner when only one hyperparameter is present
+* Fixed issue in `coef()` method for Box Learner with setting `vectorize = TRUE` and degenerate case, where min=max.
 
 # spacefinder 0.2.1
 

@@ -95,11 +95,17 @@ coef.LearnerSubspaceBox <- function(
     if (vectorize) {
       return(
         coefs[,
-          list(
-            hyperparameters = list(hyperparameter),
-            A = list(diag(1 / (max - min), nrow = length(hyperparameter))),
-            b = list(-min / (max - min))
-          ),
+          {
+            # Handle degenerate dimensions (constant hyperparameters)
+            ranges <- max - min
+            ranges[ranges < 1e-10] <- 1e-10 # Avoid division by zero
+
+            list(
+              hyperparameters = list(hyperparameter),
+              A = list(diag(1 / ranges, nrow = length(hyperparameter))),
+              b = list(-min / ranges)
+            )
+          },
           by = cat_hp
         ]
       )
@@ -110,11 +116,19 @@ coef.LearnerSubspaceBox <- function(
     coefs <- object$result$coefficients
     if (vectorize) {
       return(
-        coefs[, list(
-          hyperparameters = list(hyperparameter),
-          A = list(diag(1 / (max - min), nrow = length(hyperparameter))),
-          b = list(-min / (max - min))
-        )]
+        coefs[,
+          {
+            # Handle degenerate dimensions (constant hyperparameters)
+            ranges <- max - min
+            ranges[ranges < 1e-10] <- 1e-10 # Avoid division by zero
+
+            list(
+              hyperparameters = list(hyperparameter),
+              A = list(diag(1 / ranges, nrow = length(hyperparameter))),
+              b = list(-min / ranges)
+            )
+          }
+        ]
       )
     } else {
       return(coefs)
