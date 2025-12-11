@@ -98,13 +98,9 @@ augment.LearnerSubspacePolygon <- function(x, regularize = TRUE, ...) {
 
   # Helper function to fit beta densities for one level
   fit_level <- function(level_data, hps, A, b, w) {
-    # Normalize weights
-    w <- w / sum(w)
-
-    # Transform to [-1, 1]^d: z = Ay + b
+    # Transform to [-1,1]^d: z = Ay + b
     y <- as.matrix(level_data[, mget(hps)])
     z <- sweep(t(A %*% t(y)), 2, b, FUN = `+`)
-
     # Rescale from [-1, 1] to [0, 1]: z = (z + 1) / 2
     z <- (z + 1) / 2
 
@@ -131,6 +127,9 @@ augment.LearnerSubspacePolygon <- function(x, regularize = TRUE, ...) {
         iterations = 0L
       ))
     }
+
+    # normalize weights over the valid points only
+    DT[, w := w / sum(w)]
 
     # Fit beta MLE for each hyperparameter
     data.table::rbindlist(lapply(hps, function(hp) {

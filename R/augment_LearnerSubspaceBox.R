@@ -95,11 +95,60 @@ augment.LearnerSubspaceBox <- function(x, regularize = TRUE, ...) {
   cat_hps <- x$task$cat_hps
 
   # Helper function to fit beta densities for one level
-  fit_level <- function(level_data, hps, A, b, w) {
-    # Normalize weights
-    w <- w / sum(w)
+  # fit_level <- function(level_data, hps, A, b, w) {
+  #   # Normalize weights
+  #   w <- w / sum(w)
+  #
+  #   # Transform to [-1, 0]^d: z = Ay + b
+  #   y <- as.matrix(level_data[, mget(hps)])
+  #   z <- sweep(t(A %*% t(y)), 2, b, FUN = `+`)
+  #
+  #   # Create data.table with transformed coordinates
+  #   DT <- data.table::as.data.table(z)
+  #   data.table::setnames(DT, hps)
+  #   DT[, w := w]
+  #
+  #   # Filter valid points (within [0,1]^d)
+  #   DT[, .keep := rowSums(.SD < 0 | .SD > 1) == 0, .SDcols = hps]
+  #   DT <- DT[.keep == TRUE][, .keep := NULL]
+  #
+  #   # Handle case with no valid points
+  #   if (nrow(DT) == 0) {
+  #     warning(
+  #       "No valid points in unit cube, returning uniform prior Beta(1,1)",
+  #       call. = FALSE
+  #     )
+  #     return(data.table::data.table(
+  #       parameter = hps,
+  #       alpha = 1.0,
+  #       beta = 1.0,
+  #       converged = TRUE,
+  #       iterations = 0L
+  #     ))
+  #   }
+  #
+  #   # Fit beta MLE for each hyperparameter
+  #   data.table::rbindlist(lapply(hps, function(hp) {
+  #     fit <- fit_beta_mle_single(DT[[hp]], DT$w, ...)
+  #
+  #     # Apply regularization
+  #     if (regularize) {
+  #       fit$alpha <- max(1.0, fit$alpha)
+  #       fit$beta <- max(1.0, fit$beta)
+  #     }
+  #
+  #     data.table::data.table(
+  #       parameter = hp,
+  #       alpha = fit$alpha,
+  #       beta = fit$beta,
+  #       converged = fit$converged,
+  #       iterations = fit$iterations
+  #     )
+  #   }))
+  # }
 
-    # Transform to [-1, 0]^d: z = Ay + b
+  fit_level <- function(level_data, hps, A, b, w) {
+    # Transform to [0,1]^d: z = Ay + b
     y <- as.matrix(level_data[, mget(hps)])
     z <- sweep(t(A %*% t(y)), 2, b, FUN = `+`)
 
@@ -126,6 +175,9 @@ augment.LearnerSubspaceBox <- function(x, regularize = TRUE, ...) {
         iterations = 0L
       ))
     }
+
+    # normalize weights over the valid points only
+    DT[, w := w / sum(w)]
 
     # Fit beta MLE for each hyperparameter
     data.table::rbindlist(lapply(hps, function(hp) {
