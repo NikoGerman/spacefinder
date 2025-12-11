@@ -9,6 +9,8 @@
 - Fixed issue in [`coef()`](https://rdrr.io/r/stats/coef.html) method
   for Box Learner with setting `vectorize = TRUE` and degenerate case,
   where min=max.
+- Fixed faulty normalization of weights within
+  [`augment()`](https://generics.r-lib.org/reference/augment.html).
 
 ## spacefinder 0.2.1
 

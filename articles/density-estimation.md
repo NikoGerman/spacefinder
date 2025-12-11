@@ -39,10 +39,10 @@ learner$train(q_val = 0.9)
 # Fit beta densities
 densities <- augment(learner)
 print(densities)
-#>        parameter    alpha      beta converged iterations
-#>           <char>    <num>     <num>    <lgcl>      <int>
-#> 1: learning_rate  25500.0  48560.83     FALSE          5
-#> 2:     max_depth 307797.1 337230.58     FALSE          6
+#>        parameter alpha     beta converged iterations
+#>           <char> <num>    <num>    <lgcl>      <int>
+#> 1: learning_rate     1 1.011413      TRUE          4
+#> 2:     max_depth     1 1.000000      TRUE          7
 ```
 
 The [`augment()`](https://generics.r-lib.org/reference/augment.html)
@@ -58,9 +58,9 @@ alpha <- lr_params$alpha
 beta <- lr_params$beta
 
 cat("Learning rate Beta(", alpha, ", ", beta, ")\n", sep = "")
-#> Learning rate Beta(25500, 48560.83)
+#> Learning rate Beta(1, 1.011413)
 cat("Mode at:", (alpha - 1) / (alpha + beta - 2), "\n")
-#> Mode at: 0.3443073
+#> Mode at: 0
 ```
 
 - **α = β = 1**: Uniform distribution (all values equally likely)
@@ -132,11 +132,11 @@ samples <- data.table(
 print(samples)
 #>    learning_rate max_depth
 #>            <num>     <num>
-#> 1:   0.003049004  8.742565
-#> 2:   0.003051527  8.730131
-#> 3:   0.003066214  8.720304
-#> 4:   0.003053779  8.722425
-#> 5:   0.003054220  8.737221
+#> 1:   0.004441567  3.518000
+#> 2:   0.003979221  6.869152
+#> 3:   0.001969978 13.764904
+#> 4:   0.003526761 12.046947
+#> 5:   0.003438297 11.064951
 ```
 
 These sampled configurations are weighted toward the most promising
@@ -158,19 +158,19 @@ densities_unreg <- augment(learner, regularize = FALSE)
 cat("With regularization:\n")
 #> With regularization:
 print(densities_reg[, .(parameter, alpha, beta)])
-#>        parameter    alpha      beta
-#>           <char>    <num>     <num>
-#> 1: learning_rate  25500.0  48560.83
-#> 2:     max_depth 307797.1 337230.58
+#>        parameter alpha     beta
+#>           <char> <num>    <num>
+#> 1: learning_rate     1 1.011413
+#> 2:     max_depth     1 1.000000
 
 cat("\nWithout regularization:\n")
 #> 
 #> Without regularization:
 print(densities_unreg[, .(parameter, alpha, beta)])
-#>        parameter    alpha      beta
-#>           <char>    <num>     <num>
-#> 1: learning_rate  25500.0  48560.83
-#> 2:     max_depth 307797.1 337230.58
+#>        parameter     alpha      beta
+#>           <char>     <num>     <num>
+#> 1: learning_rate 0.7372656 1.0114126
+#> 2:     max_depth 0.3180896 0.2720397
 ```
 
 Regularization enforces α ≥ 1 and β ≥ 1, ensuring the mode exists in the
@@ -194,14 +194,14 @@ learner_cat$train(q_val = 0.9)
 
 densities_cat <- augment(learner_cat)
 print(densities_cat)
-#>        parameter      alpha      beta converged iterations optimizer
-#>           <char>      <num>     <num>    <lgcl>      <int>    <char>
-#> 1: learning_rate  30983.079  61447.43     FALSE          5   RMSprop
-#> 2:     max_depth 870727.242 881805.21     FALSE          6   RMSprop
-#> 3: learning_rate  28263.706  53101.79     FALSE          5      Adam
-#> 4:     max_depth 542381.516 548903.13     FALSE          6      Adam
-#> 5: learning_rate   8415.225  13863.58     FALSE          5       SGD
-#> 6:     max_depth 192130.515 244234.30     FALSE          6       SGD
+#>        parameter alpha  beta converged iterations optimizer
+#>           <char> <num> <num>    <lgcl>      <int>    <char>
+#> 1: learning_rate     1     1      TRUE          6   RMSprop
+#> 2:     max_depth     1     1      TRUE          9   RMSprop
+#> 3: learning_rate     1     1      TRUE          5      Adam
+#> 4:     max_depth     1     1      TRUE          8      Adam
+#> 5: learning_rate     1     1      TRUE          6       SGD
+#> 6:     max_depth     1     1      TRUE          7       SGD
 ```
 
 Each optimizer gets its own Beta distribution parameters for each
@@ -218,10 +218,10 @@ learner_polygon$train(q_val = 0.9, lambda = 0.1)
 
 densities_polygon <- augment(learner_polygon)
 print(densities_polygon)
-#>        parameter     alpha       beta converged iterations
-#>           <char>     <num>      <num>    <lgcl>      <int>
-#> 1: learning_rate 67965.150 134186.588     FALSE          5
-#> 2:     max_depth  6901.703   7259.013     FALSE          5
+#>        parameter alpha    beta converged iterations
+#>           <char> <num>   <num>    <lgcl>      <int>
+#> 1: learning_rate     1 1.39525      TRUE          4
+#> 2:     max_depth     1 1.00000      TRUE          5
 ```
 
 The process is the same: data is transformed to the unit cube, then Beta
@@ -267,12 +267,12 @@ sessionInfo()
 #> 
 #> other attached packages:
 #> [1] generics_0.1.4         ggplot2_4.0.1          data.table_1.17.8     
-#> [4] spacefinder_0.2.1.9000
+#> [4] spacefinder_0.2.1.9001
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] Matrix_1.7-4       bit_4.6.0          gtable_0.3.6       jsonlite_2.0.0    
 #>  [5] Rmpfr_1.1-2        compiler_4.5.2     Rcpp_1.1.0         jquerylib_0.1.4   
-#>  [9] systemfonts_1.3.1  scales_1.4.0       textshaping_1.0.4  yaml_2.3.11       
+#>  [9] systemfonts_1.3.1  scales_1.4.0       textshaping_1.0.4  yaml_2.3.12       
 #> [13] fastmap_1.2.0      lattice_0.22-7     R6_2.6.1           labeling_0.4.3    
 #> [17] knitr_1.50         backports_1.5.0    checkmate_2.3.3    desc_1.4.3        
 #> [21] bslib_0.9.0        RColorBrewer_1.1-3 rlang_1.1.6        cachem_1.1.0      
