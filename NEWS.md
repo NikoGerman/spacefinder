@@ -5,6 +5,7 @@
 * Fixed issues in `coef()` method for Box Learner when only one hyperparameter is present
 * Fixed issue in `coef()` method for Box Learner with setting `vectorize = TRUE` and degenerate case, where min=max.
 * Fixed faulty normalization of weights within `augment()`.
+* Altered synthetic dataset `benchmark_data`.
 
 # spacefinder 0.2.1
 

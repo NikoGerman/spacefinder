@@ -5,51 +5,87 @@
 \alias{benchmark_data}
 \title{Synthetic Hyperparameter Benchmark Data}
 \format{
-A \code{data.table} with 1000 rows and 5 columns:
+A \code{data.table} with 7500 rows and 5 columns:
 \describe{
 \item{task}{Character. Task identifier (task1 through task5)}
-\item{learning_rate}{Numeric. Learning rate in range \eqn{[0.0001, 0.1]}}
-\item{max_depth}{Integer. Maximum tree depth in range \eqn{[3, 15]}}
+\item{learning_rate}{Numeric. Learning rate with task-specific ranges.
+Base range \eqn{[0.0001, 0.1]} scaled by exponential random factor per task}
+\item{max_depth}{Integer. Maximum tree depth with task-specific ranges.
+Base range \eqn{[2, 11]} shifted by random offset (1-4) per task}
 \item{optimizer}{Character. Optimizer type: "SGD", "Adam", or "RMSprop"}
-\item{auc}{Numeric. Area Under ROC Curve in range \eqn{[0.5, 0.98]}. Higher is better.
-Most values between 0.6-0.85, with top performers rarely exceeding 0.90}
+\item{auc}{Numeric. Area Under ROC Curve in range \eqn{[0.5, 1.0]}.
+Higher is better, normalized per optimizer to span \eqn{[0.5, 1.0]}}
 }
 }
 \source{
-Synthetically generated for package examples
+Synthetically generated for package examples and vignettes
 }
 \usage{
 benchmark_data
 }
 \description{
-Simulated hyperparameter tuning results for demonstrating spacefinder
+Simulated hyperparameter tuning results designed to demonstrate spacefinder
 functionality. Contains performance metrics (AUC) for various hyperparameter
-configurations across multiple tasks and optimizers.
+configurations across multiple tasks with three distinct performance patterns
+and task-specific hyperparameter ranges.
 }
 \details{
-The data simulates realistic hyperparameter tuning scenarios where:
+The data is synthetically generated to showcase different subspace learner
+strengths through three distinct performance patterns, each mapped to a
+realistic optimizer name:
+
+\strong{Optimizer Patterns (in normalized hyperparameter space):}
 \itemize{
-\item Performance peaks around learning_rate \eqn{0.003} and max_depth \eqn{8}
-\item Adam optimizer provides slight performance boost over SGD and RMSprop
-\item Each task has slight performance variations
-\item Most configurations are mediocre, with excellent performance being rare
+\item \strong{Adam}: Unimodal peaked pattern with performance concentrated
+at the center (0.5, 0.5) of the normalized hyperparameter space.
+Performance decays exponentially with distance from this peak.
+\item \strong{SGD}: Linear dependency pattern where performance follows the
+diagonal (learning_rate \eqn{\approx} max_depth after normalization).
+Performance is \eqn{1 - |a - b|} where \eqn{a, b \in [0,1]}.
+\item \strong{RMSprop}: Bimodal pattern with two Gaussian peaks centered at
+(0.2, 0.2) and (0.8, 0.8) in normalized space.
 }
 
-Generated using a mixture of normal distributions with realistic noise and
-soft capping to ensure values above 0.9 are extremely rare.
+\strong{Task-Specific Variations:}
+
+Each of the five tasks has different optimal hyperparameter ranges:
+\itemize{
+\item Learning rates are scaled by task-specific exponential random factors
+\item Tree depths are shifted by task-specific random offsets (1-4)
+\item These range differences simulate realistic scenarios where different
+datasets require different hyperparameter scales while maintaining the
+same underlying performance patterns
+}
+
+Performance values are normalized per optimizer to ensure all patterns span
+\eqn{[0.5, 1.0]}, with added Gaussian noise (\eqn{\sigma = 0.02}) to simulate
+realistic evaluation variability.
 }
 \examples{
 data(benchmark_data)
 head(benchmark_data)
 
-# Summary statistics
-summary(benchmark_data$auc)
+# Summary statistics by optimizer
+benchmark_data[, .(
+  n = .N,
+  mean_auc = mean(auc),
+  max_auc = max(auc)
+), by = optimizer]
 
-# Create a task
-task <- TaskSubspace$new(
-  data = benchmark_data,
-  target_measure = "auc",
-  hps = c("learning_rate", "max_depth")
-)
+
+# Visualize patterns for a specific task
+\dontrun{
+library(ggplot2)
+ggplot(benchmark_data[task == "task1"],
+       aes(log10(learning_rate), max_depth, color = auc)) +
+  geom_point(alpha = 0.6) +
+  scale_color_viridis_c(limits = c(0.5, 1)) +
+  facet_wrap(~optimizer) +
+  theme_minimal() +
+  labs(
+    title = "Performance Patterns by Optimizer (Task 1)",
+    subtitle = "Adam: peaked | SGD: linear | RMSprop: bimodal"
+  )
+}
 }
 \keyword{datasets}
