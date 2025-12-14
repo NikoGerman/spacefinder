@@ -81,10 +81,10 @@ patchwork::wrap_plots(p_box, p_polygon, p_ellipsoid, ncol = 3)
 ``` r
 coef(learner_box)
 #> Index: <hyperparameter>
-#>    hyperparameter         min          max
-#>            <char>       <num>        <num>
-#> 1:  learning_rate 0.001746408  0.005541915
-#> 2:      max_depth 8.000000000 10.000017952
+#>    hyperparameter          min         max
+#>            <char>        <num>       <num>
+#> 1:  learning_rate 0.0005110362  0.01208647
+#> 2:      max_depth 8.0000000000 10.00000000
 ```
 
 Box learners give you direct bounds: “use learning_rate between X and
@@ -95,21 +95,21 @@ Y”.
 ``` r
 # Polygon
 coef(learner_polygon)
-#>            hyperparameters                                                   A
-#>                     <list>                                              <list>
-#> 1: learning_rate,max_depth 581.10374783,  0.01510349,  0.01510349,  0.18162525
+#>            hyperparameters                                           A
+#>                     <list>                                      <list>
+#> 1: learning_rate,max_depth 67.7775970,-0.3225274,-0.3225274, 0.2227666
 #>                      b
 #>                 <list>
-#> 1: -2.259721,-1.727565
+#> 1:  2.172672,-1.890156
 
 # Ellipsoid  
 coef(learner_ellipsoid)
-#>            hyperparameters                                                   A
-#>                     <list>                                              <list>
-#> 1: learning_rate,max_depth 4.693968e+02,4.370045e-03,4.370045e-03,1.716406e-01
+#>            hyperparameters                                           A
+#>                     <list>                                      <list>
+#> 1: learning_rate,max_depth 59.0010853,-0.1908523,-0.1908523, 0.2094325
 #>                      b
 #>                 <list>
-#> 1: -1.512929,-1.618121
+#> 1:  0.795095,-2.034400
 ```
 
 Polygon and Ellipsoid use transformation matrices **A** and **b**. These
@@ -121,11 +121,11 @@ are harder to interpret but allow more flexible shapes.
 cat("Outliers identified:\n")
 #> Outliers identified:
 cat("  Box:", nrow(outliers(learner_box)), "\n")
-#>   Box: 75
+#>   Box: 551
 cat("  Polygon:", nrow(suppressMessages(outliers(learner_polygon))), "\n")
-#>   Polygon: 100
+#>   Polygon: 99
 cat("  Ellipsoid:", nrow(suppressMessages(outliers(learner_ellipsoid))), "\n")
-#>   Ellipsoid: 23
+#>   Ellipsoid: 120
 ```
 
 Different learners may identify different configurations as outliers
@@ -162,7 +162,7 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] ggplot2_4.0.1          data.table_1.17.8      spacefinder_0.2.1.9001
+#> [1] ggplot2_4.0.1          data.table_1.17.8      spacefinder_0.2.1.9003
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] Matrix_1.7-4       bit_4.6.0          gtable_0.3.6       jsonlite_2.0.0    

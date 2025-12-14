@@ -25,21 +25,21 @@ synthetic hyperparameter tuning results:
 data("benchmark_data", package = "spacefinder")
 head(benchmark_data)
 #>      task learning_rate max_depth optimizer       auc
-#>    <char>         <num>     <int>    <char>     <num>
-#> 1:  task1  0.0555159953        10   RMSprop 0.5000000
-#> 2:  task1  0.0647479824         4      Adam 0.5000000
-#> 3:  task1  0.0007218029        11       SGD 0.9455143
-#> 4:  task1  0.0309986570        14   RMSprop 0.8306492
-#> 5:  task1  0.0084185357        13      Adam 0.9496575
-#> 6:  task1  0.0036081771        15   RMSprop 0.9499609
+#>    <char>         <num>     <num>    <char>     <num>
+#> 1:  task1  1.669706e-03        11       SGD 0.8732184
+#> 2:  task1  7.156343e-04        10       SGD 0.8407793
+#> 3:  task1  3.214906e-03         8       SGD 0.9680098
+#> 4:  task1  5.028091e-05         7       SGD 0.7771257
+#> 5:  task1  1.855155e-03        12       SGD 0.8427566
+#> 6:  task1  2.585816e-03         3       SGD 0.7729911
 
 # Summary statistics
 summary(benchmark_data$auc)
 #>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-#>  0.5000  0.6095  0.9329  0.8062  0.9498  0.9500
+#>  0.5000  0.5672  0.6777  0.7080  0.8435  1.0000
 cat("\nConfigurations with AUC > 0.9:", sum(benchmark_data$auc > 0.9), "\n")
 #> 
-#> Configurations with AUC > 0.9: 564
+#> Configurations with AUC > 0.9: 1241
 ```
 
 The dataset includes: - 5 tasks (different datasets) - 200
@@ -90,14 +90,14 @@ Get the fitted hyperparameter bounds:
 ``` r
 bounds <- coef(learner)
 print(bounds)
-#>    hyperparameter         min         max
-#>            <char>       <num>       <num>
-#> 1:  learning_rate 0.001746421  0.00554191
-#> 2:      max_depth 3.000000000 15.00000000
+#>    hyperparameter          min         max
+#>            <char>        <num>       <num>
+#> 1:  learning_rate 5.064595e-05  0.06800025
+#> 2:      max_depth 3.000000e+00 15.00000000
 ```
 
-The learned optimal ranges: - `learning_rate`: between 0.0017 and
-0.0055 - `max_depth`: between 3 and 15
+The learned optimal ranges: - `learning_rate`: between 0.0001 and
+0.0680 - `max_depth`: between 3 and 15
 
 ### Summary
 
@@ -116,17 +116,17 @@ summary(learner)
 #> 
 #> COEFFICIENTS
 #> -------------------------------------------------- 
-#> hyperparameter          min          max
-#> ---------------  ----------  -----------
-#> learning_rate     0.0017464    0.0055419
-#> max_depth         3.0000000   15.0000000
+#> hyperparameter         min          max
+#> ---------------  ---------  -----------
+#> learning_rate     5.06e-05    0.0680003
+#> max_depth         3.00e+00   15.0000000
 #> 
 #> 
 #> STATUS
 #> -------------------------------------------------- 
 #>  observations 
 #>  -------------
-#>  100
+#>  750
 ```
 
 The summary shows: - **Summary**: Task information - **Coefficients**:
@@ -183,7 +183,7 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] ggplot2_4.0.1          data.table_1.17.8      spacefinder_0.2.1.9001
+#> [1] ggplot2_4.0.1          data.table_1.17.8      spacefinder_0.2.1.9003
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] Matrix_1.7-4       bit_4.6.0          gtable_0.3.6       jsonlite_2.0.0    

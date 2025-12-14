@@ -28,11 +28,11 @@ benchmark_data[, .(
   max_auc = max(auc),
   n = .N
 ), by = optimizer]
-#>    optimizer  mean_auc median_auc    sd_auc   max_auc     n
-#>       <char>     <num>      <num>     <num>     <num> <int>
-#> 1:   RMSprop 0.7916034  0.9097144 0.1883038 0.9499907   301
-#> 2:      Adam 0.8185814  0.9380809 0.1789091 0.9499937   399
-#> 3:       SGD 0.8043445  0.9356146 0.1882794 0.9499810   300
+#>    optimizer  mean_auc median_auc     sd_auc max_auc     n
+#>       <char>     <num>      <num>      <num>   <num> <int>
+#> 1:       SGD 0.8346208  0.8554099 0.11751028       1  2500
+#> 2:      Adam 0.6010436  0.5762377 0.09207576       1  2500
+#> 3:   RMSprop 0.6884296  0.6504798 0.14778183       1  2500
 
 # Visualize distributions
 ggplot(benchmark_data, aes(x = auc, fill = optimizer)) +
@@ -89,14 +89,14 @@ The coefficients now show separate bounds for each optimizer:
 ``` r
 bounds <- coef(learner)
 print(bounds)
-#>    optimizer hyperparameter         min          max
-#>       <char>         <char>       <num>        <num>
-#> 1:   RMSprop  learning_rate 0.001530802  0.005875366
-#> 2:   RMSprop      max_depth 3.000000000 15.000000000
-#> 3:      Adam  learning_rate 0.001973576  0.005565649
-#> 4:      Adam      max_depth 3.000000000 15.000000000
-#> 5:       SGD  learning_rate 0.001786868  0.005316169
-#> 6:       SGD      max_depth 3.000000000 15.000000000
+#>    optimizer hyperparameter          min         max
+#>       <char>         <char>        <num>       <num>
+#> 1:       SGD  learning_rate 0.0000646238  0.06077546
+#> 2:       SGD      max_depth 3.0000000000 15.00000000
+#> 3:      Adam  learning_rate 0.0008549492  0.01177603
+#> 4:      Adam      max_depth 7.0000000000 11.00000000
+#> 5:   RMSprop  learning_rate 0.0001591802  0.07528367
+#> 6:   RMSprop      max_depth 4.0000000000 14.00000000
 ```
 
 Notice how different optimizers have different optimal ranges!
@@ -134,21 +134,21 @@ summary(learner)
 #> -------------------------------------------------- 
 #> optimizer   hyperparameter          min          max
 #> ----------  ---------------  ----------  -----------
-#> RMSprop     learning_rate     0.0015308    0.0058754
-#> RMSprop     max_depth         3.0000000   15.0000000
-#> Adam        learning_rate     0.0019736    0.0055656
-#> Adam        max_depth         3.0000000   15.0000000
-#> SGD         learning_rate     0.0017869    0.0053162
+#> SGD         learning_rate     0.0000646    0.0607755
 #> SGD         max_depth         3.0000000   15.0000000
+#> Adam        learning_rate     0.0008549    0.0117760
+#> Adam        max_depth         7.0000000   11.0000000
+#> RMSprop     learning_rate     0.0001592    0.0752837
+#> RMSprop     max_depth         4.0000000   14.0000000
 #> 
 #> 
 #> STATUS
 #> -------------------------------------------------- 
 #> optimizer   status    objective_value   n_violations   observations
 #> ----------  -------  ----------------  -------------  -------------
-#> RMSprop     NULL                 NULL           NULL             33
-#> Adam        NULL                 NULL           NULL             42
-#> SGD         NULL                 NULL           NULL             32
+#> SGD         NULL                 NULL           NULL            250
+#> Adam        NULL                 NULL           NULL            250
+#> RMSprop     NULL                 NULL           NULL            250
 ```
 
 Each optimizer gets its own row in the status table, showing: - Number
@@ -161,7 +161,7 @@ optimizer:
 
 ``` r
 lapply(autoplot(learner), \(plot) plot + scale_x_continuous(limits = c(0, .01)))
-#> $RMSprop
+#> $SGD
 ```
 
 ![](categorical-hyperparameters_files/figure-html/visualize-1.png)
@@ -172,7 +172,7 @@ lapply(autoplot(learner), \(plot) plot + scale_x_continuous(limits = c(0, .01)))
 ![](categorical-hyperparameters_files/figure-html/visualize-2.png)
 
     #> 
-    #> $SGD
+    #> $RMSprop
 
 ![](categorical-hyperparameters_files/figure-html/visualize-3.png)
 
@@ -198,9 +198,9 @@ top_configs_summary <- learner$top_configs[, .(
 print(top_configs_summary)
 #>    optimizer     mean_lr   median_lr mean_depth median_depth  mean_auc     n
 #>       <char>       <num>       <num>      <num>        <num>     <num> <int>
-#> 1:   RMSprop 0.003233532 0.003093437   9.515152           10 0.9499607    33
-#> 2:      Adam 0.003243376 0.003269311   9.619048           10 0.9499767    42
-#> 3:       SGD 0.003003816 0.002749956   8.968750            9 0.9499650    32
+#> 1:       SGD 0.008340861 0.003586301      8.972            9 0.9888067   250
+#> 2:      Adam 0.003784583 0.003486343      8.952            9 0.8105505   250
+#> 3:   RMSprop 0.015224210 0.012173355      9.204           11 0.9642822   250
 ```
 
 ``` r
@@ -247,7 +247,7 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] ggplot2_4.0.1          data.table_1.17.8      spacefinder_0.2.1.9001
+#> [1] ggplot2_4.0.1          data.table_1.17.8      spacefinder_0.2.1.9003
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] Matrix_1.7-4       bit_4.6.0          gtable_0.3.6       jsonlite_2.0.0    

@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">spacefinder</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1.9001</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1.9003</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -99,21 +99,21 @@ contains synthetic hyperparameter tuning results:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"benchmark_data"</span>, package <span class="op">=</span> <span class="st">"spacefinder"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">benchmark_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      task learning_rate max_depth optimizer       auc</span></span>
-<span><span class="co">#&gt;    &lt;char&gt;         &lt;num&gt;     &lt;int&gt;    &lt;char&gt;     &lt;num&gt;</span></span>
-<span><span class="co">#&gt; 1:  task1  0.0555159953        10   RMSprop 0.5000000</span></span>
-<span><span class="co">#&gt; 2:  task1  0.0647479824         4      Adam 0.5000000</span></span>
-<span><span class="co">#&gt; 3:  task1  0.0007218029        11       SGD 0.9455143</span></span>
-<span><span class="co">#&gt; 4:  task1  0.0309986570        14   RMSprop 0.8306492</span></span>
-<span><span class="co">#&gt; 5:  task1  0.0084185357        13      Adam 0.9496575</span></span>
-<span><span class="co">#&gt; 6:  task1  0.0036081771        15   RMSprop 0.9499609</span></span>
+<span><span class="co">#&gt;    &lt;char&gt;         &lt;num&gt;     &lt;num&gt;    &lt;char&gt;     &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1:  task1  1.669706e-03        11       SGD 0.8732184</span></span>
+<span><span class="co">#&gt; 2:  task1  7.156343e-04        10       SGD 0.8407793</span></span>
+<span><span class="co">#&gt; 3:  task1  3.214906e-03         8       SGD 0.9680098</span></span>
+<span><span class="co">#&gt; 4:  task1  5.028091e-05         7       SGD 0.7771257</span></span>
+<span><span class="co">#&gt; 5:  task1  1.855155e-03        12       SGD 0.8427566</span></span>
+<span><span class="co">#&gt; 6:  task1  2.585816e-03         3       SGD 0.7729911</span></span>
 <span></span>
 <span><span class="co"># Summary statistics</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">benchmark_data</span><span class="op">$</span><span class="va">auc</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span></span>
-<span><span class="co">#&gt;  0.5000  0.6095  0.9329  0.8062  0.9498  0.9500</span></span>
+<span><span class="co">#&gt;  0.5000  0.5672  0.6777  0.7080  0.8435  1.0000</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nConfigurations with AUC &gt; 0.9:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">benchmark_data</span><span class="op">$</span><span class="va">auc</span> <span class="op">&gt;</span> <span class="fl">0.9</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Configurations with AUC &gt; 0.9: 564</span></span></code></pre></div>
+<span><span class="co">#&gt; Configurations with AUC &gt; 0.9: 1241</span></span></code></pre></div>
 <p>The dataset includes: - 5 tasks (different datasets) - 200
 configurations per task - Hyperparameters: <code>learning_rate</code>,
 <code>max_depth</code>, <code>optimizer</code> - Performance:
@@ -162,12 +162,12 @@ each task.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bounds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">learner</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">bounds</span><span class="op">)</span></span>
-<span><span class="co">#&gt;    hyperparameter         min         max</span></span>
-<span><span class="co">#&gt;            &lt;char&gt;       &lt;num&gt;       &lt;num&gt;</span></span>
-<span><span class="co">#&gt; 1:  learning_rate 0.001746421  0.00554191</span></span>
-<span><span class="co">#&gt; 2:      max_depth 3.000000000 15.00000000</span></span></code></pre></div>
+<span><span class="co">#&gt;    hyperparameter          min         max</span></span>
+<span><span class="co">#&gt;            &lt;char&gt;        &lt;num&gt;       &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1:  learning_rate 5.064595e-05  0.06800025</span></span>
+<span><span class="co">#&gt; 2:      max_depth 3.000000e+00 15.00000000</span></span></code></pre></div>
 <p>The learned optimal ranges: - <code>learning_rate</code>: between
-0.0017 and 0.0055 - <code>max_depth</code>: between 3 and 15</p>
+0.0001 and 0.0680 - <code>max_depth</code>: between 3 and 15</p>
 </div>
 <div class="section level3">
 <h3 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
@@ -186,17 +186,17 @@ each task.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; COEFFICIENTS</span></span>
 <span><span class="co">#&gt; -------------------------------------------------- </span></span>
-<span><span class="co">#&gt; hyperparameter          min          max</span></span>
-<span><span class="co">#&gt; ---------------  ----------  -----------</span></span>
-<span><span class="co">#&gt; learning_rate     0.0017464    0.0055419</span></span>
-<span><span class="co">#&gt; max_depth         3.0000000   15.0000000</span></span>
+<span><span class="co">#&gt; hyperparameter         min          max</span></span>
+<span><span class="co">#&gt; ---------------  ---------  -----------</span></span>
+<span><span class="co">#&gt; learning_rate     5.06e-05    0.0680003</span></span>
+<span><span class="co">#&gt; max_depth         3.00e+00   15.0000000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; STATUS</span></span>
 <span><span class="co">#&gt; -------------------------------------------------- </span></span>
 <span><span class="co">#&gt;  observations </span></span>
 <span><span class="co">#&gt;  -------------</span></span>
-<span><span class="co">#&gt;  100</span></span></code></pre></div>
+<span><span class="co">#&gt;  750</span></span></code></pre></div>
 <p>The summary shows: - <strong>Summary</strong>: Task information -
 <strong>Coefficients</strong>: Fitted bounds - <strong>Status</strong>:
 Number of observations used for fitting</p>
@@ -257,7 +257,7 @@ probabilistic density with <code><a href="https://generics.r-lib.org/reference/a
 <span><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt; [1] ggplot2_4.0.1          data.table_1.17.8      spacefinder_0.2.1.9001</span></span>
+<span><span class="co">#&gt; [1] ggplot2_4.0.1          data.table_1.17.8      spacefinder_0.2.1.9003</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
 <span><span class="co">#&gt;  [1] Matrix_1.7-4       bit_4.6.0          gtable_0.3.6       jsonlite_2.0.0    </span></span>

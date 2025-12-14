@@ -11,6 +11,7 @@
   where min=max.
 - Fixed faulty normalization of weights within
   [`augment()`](https://generics.r-lib.org/reference/augment.html).
+- Altered synthetic dataset `benchmark_data`.
 
 ## spacefinder 0.2.1
 

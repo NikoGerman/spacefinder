@@ -41,8 +41,8 @@ densities <- augment(learner)
 print(densities)
 #>        parameter alpha     beta converged iterations
 #>           <char> <num>    <num>    <lgcl>      <int>
-#> 1: learning_rate     1 1.011413      TRUE          4
-#> 2:     max_depth     1 1.000000      TRUE          7
+#> 1: learning_rate     1 2.170536      TRUE          6
+#> 2:     max_depth     1 1.000000      TRUE          6
 ```
 
 The [`augment()`](https://generics.r-lib.org/reference/augment.html)
@@ -58,7 +58,7 @@ alpha <- lr_params$alpha
 beta <- lr_params$beta
 
 cat("Learning rate Beta(", alpha, ", ", beta, ")\n", sep = "")
-#> Learning rate Beta(1, 1.011413)
+#> Learning rate Beta(1, 2.170536)
 cat("Mode at:", (alpha - 1) / (alpha + beta - 2), "\n")
 #> Mode at: 0
 ```
@@ -132,11 +132,11 @@ samples <- data.table(
 print(samples)
 #>    learning_rate max_depth
 #>            <num>     <num>
-#> 1:   0.004441567  3.518000
-#> 2:   0.003979221  6.869152
-#> 3:   0.001969978 13.764904
-#> 4:   0.003526761 12.046947
-#> 5:   0.003438297 11.064951
+#> 1:   0.036267995  3.518000
+#> 2:   0.027209084  6.869152
+#> 3:   0.001976163 13.764904
+#> 4:   0.019866312 12.046947
+#> 5:   0.018574065 11.064951
 ```
 
 These sampled configurations are weighted toward the most promising
@@ -160,7 +160,7 @@ cat("With regularization:\n")
 print(densities_reg[, .(parameter, alpha, beta)])
 #>        parameter alpha     beta
 #>           <char> <num>    <num>
-#> 1: learning_rate     1 1.011413
+#> 1: learning_rate     1 2.170536
 #> 2:     max_depth     1 1.000000
 
 cat("\nWithout regularization:\n")
@@ -169,8 +169,8 @@ cat("\nWithout regularization:\n")
 print(densities_unreg[, .(parameter, alpha, beta)])
 #>        parameter     alpha      beta
 #>           <char>     <num>     <num>
-#> 1: learning_rate 0.7372656 1.0114126
-#> 2:     max_depth 0.3180896 0.2720397
+#> 1: learning_rate 0.3671875 2.1705359
+#> 2:     max_depth 0.6490467 0.6671625
 ```
 
 Regularization enforces α ≥ 1 and β ≥ 1, ensuring the mode exists in the
@@ -194,14 +194,14 @@ learner_cat$train(q_val = 0.9)
 
 densities_cat <- augment(learner_cat)
 print(densities_cat)
-#>        parameter alpha  beta converged iterations optimizer
-#>           <char> <num> <num>    <lgcl>      <int>    <char>
-#> 1: learning_rate     1     1      TRUE          6   RMSprop
-#> 2:     max_depth     1     1      TRUE          9   RMSprop
-#> 3: learning_rate     1     1      TRUE          5      Adam
-#> 4:     max_depth     1     1      TRUE          8      Adam
-#> 5: learning_rate     1     1      TRUE          6       SGD
-#> 6:     max_depth     1     1      TRUE          7       SGD
+#>        parameter alpha     beta converged iterations optimizer
+#>           <char> <num>    <num>    <lgcl>      <int>    <char>
+#> 1: learning_rate     1 2.109833      TRUE          6       SGD
+#> 2:     max_depth     1 1.000000      TRUE          7       SGD
+#> 3: learning_rate     1 1.368952      TRUE          4      Adam
+#> 4:     max_depth     1 1.000000      TRUE          6      Adam
+#> 5: learning_rate     1 1.774986      TRUE          6   RMSprop
+#> 6:     max_depth     1 1.000000      TRUE          8   RMSprop
 ```
 
 Each optimizer gets its own Beta distribution parameters for each
@@ -218,10 +218,10 @@ learner_polygon$train(q_val = 0.9, lambda = 0.1)
 
 densities_polygon <- augment(learner_polygon)
 print(densities_polygon)
-#>        parameter alpha    beta converged iterations
-#>           <char> <num>   <num>    <lgcl>      <int>
-#> 1: learning_rate     1 1.39525      TRUE          4
-#> 2:     max_depth     1 1.00000      TRUE          5
+#>        parameter    alpha     beta converged iterations
+#>           <char>    <num>    <num>    <lgcl>      <int>
+#> 1: learning_rate 1.113984 1.153455      TRUE          3
+#> 2:     max_depth 1.000000 1.178475      TRUE          7
 ```
 
 The process is the same: data is transformed to the unit cube, then Beta
@@ -267,7 +267,7 @@ sessionInfo()
 #> 
 #> other attached packages:
 #> [1] generics_0.1.4         ggplot2_4.0.1          data.table_1.17.8     
-#> [4] spacefinder_0.2.1.9001
+#> [4] spacefinder_0.2.1.9003
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] Matrix_1.7-4       bit_4.6.0          gtable_0.3.6       jsonlite_2.0.0    

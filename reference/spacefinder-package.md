@@ -30,7 +30,8 @@ to high-performing hyperparameter configurations.
 
 - `augment()`: Add beta density parameters
 
-- `autoplot()`: Visualize fitted subspaces
+- [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html):
+  Visualize fitted subspaces
 
 - [`outliers()`](https://nikogerman.github.io/spacefinder/reference/outliers.md):
   Extract outlier configurations

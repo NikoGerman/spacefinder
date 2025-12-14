@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">spacefinder</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1.9001</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1.9003</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -162,10 +162,10 @@ fit</li>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">learner_box</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Index: &lt;hyperparameter&gt;</span></span>
-<span><span class="co">#&gt;    hyperparameter         min          max</span></span>
-<span><span class="co">#&gt;            &lt;char&gt;       &lt;num&gt;        &lt;num&gt;</span></span>
-<span><span class="co">#&gt; 1:  learning_rate 0.001746408  0.005541915</span></span>
-<span><span class="co">#&gt; 2:      max_depth 8.000000000 10.000017952</span></span></code></pre></div>
+<span><span class="co">#&gt;    hyperparameter          min         max</span></span>
+<span><span class="co">#&gt;            &lt;char&gt;        &lt;num&gt;       &lt;num&gt;</span></span>
+<span><span class="co">#&gt; 1:  learning_rate 0.0005110362  0.01208647</span></span>
+<span><span class="co">#&gt; 2:      max_depth 8.0000000000 10.00000000</span></span></code></pre></div>
 <p>Box learners give you direct bounds: “use learning_rate between X and
 Y”.</p>
 </div>
@@ -175,21 +175,21 @@ Y”.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Polygon</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">learner_polygon</span><span class="op">)</span></span>
-<span><span class="co">#&gt;            hyperparameters                                                   A</span></span>
-<span><span class="co">#&gt;                     &lt;list&gt;                                              &lt;list&gt;</span></span>
-<span><span class="co">#&gt; 1: learning_rate,max_depth 581.10374783,  0.01510349,  0.01510349,  0.18162525</span></span>
+<span><span class="co">#&gt;            hyperparameters                                           A</span></span>
+<span><span class="co">#&gt;                     &lt;list&gt;                                      &lt;list&gt;</span></span>
+<span><span class="co">#&gt; 1: learning_rate,max_depth 67.7775970,-0.3225274,-0.3225274, 0.2227666</span></span>
 <span><span class="co">#&gt;                      b</span></span>
 <span><span class="co">#&gt;                 &lt;list&gt;</span></span>
-<span><span class="co">#&gt; 1: -2.259721,-1.727565</span></span>
+<span><span class="co">#&gt; 1:  2.172672,-1.890156</span></span>
 <span></span>
 <span><span class="co"># Ellipsoid  </span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">learner_ellipsoid</span><span class="op">)</span></span>
-<span><span class="co">#&gt;            hyperparameters                                                   A</span></span>
-<span><span class="co">#&gt;                     &lt;list&gt;                                              &lt;list&gt;</span></span>
-<span><span class="co">#&gt; 1: learning_rate,max_depth 4.693968e+02,4.370045e-03,4.370045e-03,1.716406e-01</span></span>
+<span><span class="co">#&gt;            hyperparameters                                           A</span></span>
+<span><span class="co">#&gt;                     &lt;list&gt;                                      &lt;list&gt;</span></span>
+<span><span class="co">#&gt; 1: learning_rate,max_depth 59.0010853,-0.1908523,-0.1908523, 0.2094325</span></span>
 <span><span class="co">#&gt;                      b</span></span>
 <span><span class="co">#&gt;                 &lt;list&gt;</span></span>
-<span><span class="co">#&gt; 1: -1.512929,-1.618121</span></span></code></pre></div>
+<span><span class="co">#&gt; 1:  0.795095,-2.034400</span></span></code></pre></div>
 <p>Polygon and Ellipsoid use transformation matrices <strong>A</strong>
 and <strong>b</strong>. These are harder to interpret but allow more
 flexible shapes.</p>
@@ -202,11 +202,11 @@ flexible shapes.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Outliers identified:\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Outliers identified:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Box:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="fu"><a href="../reference/outliers.html">outliers</a></span><span class="op">(</span><span class="va">learner_box</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   Box: 75</span></span>
+<span><span class="co">#&gt;   Box: 551</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Polygon:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressMessages</a></span><span class="op">(</span><span class="fu"><a href="../reference/outliers.html">outliers</a></span><span class="op">(</span><span class="va">learner_polygon</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   Polygon: 100</span></span>
+<span><span class="co">#&gt;   Polygon: 99</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Ellipsoid:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressMessages</a></span><span class="op">(</span><span class="fu"><a href="../reference/outliers.html">outliers</a></span><span class="op">(</span><span class="va">learner_ellipsoid</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   Ellipsoid: 23</span></span></code></pre></div>
+<span><span class="co">#&gt;   Ellipsoid: 120</span></span></code></pre></div>
 <p>Different learners may identify different configurations as outliers
 based on their geometry.</p>
 </div>
@@ -245,7 +245,7 @@ categorical variables</li>
 <span><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt; [1] ggplot2_4.0.1          data.table_1.17.8      spacefinder_0.2.1.9001</span></span>
+<span><span class="co">#&gt; [1] ggplot2_4.0.1          data.table_1.17.8      spacefinder_0.2.1.9003</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
 <span><span class="co">#&gt;  [1] Matrix_1.7-4       bit_4.6.0          gtable_0.3.6       jsonlite_2.0.0    </span></span>
