@@ -1,4 +1,4 @@
-# spacefinder (development version)
+# spacefinder 0.2.2
 
 ## Bug Fixes
 
