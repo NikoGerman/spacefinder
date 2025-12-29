@@ -8,13 +8,13 @@
 ## Citation
 
 German N (2025). *spacefinder: Find Promising Subspaces Within The
-Hyperparameter Space*. R package version 0.2.1.9003,
+Hyperparameter Space*. R package version 0.2.2.0000,
 <https://nikogerman.github.io/spacefinder/>.
 
     @Manual{,
       title = {spacefinder: Find Promising Subspaces Within The Hyperparameter Space},
       author = {Nikolai German},
       year = {2025},
-      note = {R package version 0.2.1.9003},
+      note = {R package version 0.2.2.0000},
       url = {https://nikogerman.github.io/spacefinder/},
     }

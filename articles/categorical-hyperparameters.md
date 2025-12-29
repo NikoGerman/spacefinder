@@ -247,16 +247,16 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] ggplot2_4.0.1          data.table_1.17.8      spacefinder_0.2.1.9003
+#> [1] ggplot2_4.0.1          data.table_1.18.0      spacefinder_0.2.2.0000
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] Matrix_1.7-4       bit_4.6.0          gtable_0.3.6       jsonlite_2.0.0    
 #>  [5] Rmpfr_1.1-2        compiler_4.5.2     Rcpp_1.1.0         jquerylib_0.1.4   
 #>  [9] systemfonts_1.3.1  scales_1.4.0       textshaping_1.0.4  yaml_2.3.12       
 #> [13] fastmap_1.2.0      lattice_0.22-7     R6_2.6.1           patchwork_1.3.2   
-#> [17] labeling_0.4.3     generics_0.1.4     knitr_1.50         backports_1.5.0   
+#> [17] labeling_0.4.3     generics_0.1.4     knitr_1.51         backports_1.5.0   
 #> [21] checkmate_2.3.3    desc_1.4.3         bslib_0.9.0        RColorBrewer_1.1-3
-#> [25] rlang_1.1.6        cachem_1.1.0       CVXR_1.0-15        xfun_0.54         
+#> [25] rlang_1.1.6        cachem_1.1.0       CVXR_1.0-15        xfun_0.55         
 #> [29] S7_0.2.1           fs_1.6.6           sass_0.4.10        bit64_4.6.0-1     
 #> [33] cli_3.6.5          withr_3.0.2        pkgdown_2.2.0      digest_0.6.39     
 #> [37] grid_4.5.2         gmp_0.7-5          lifecycle_1.0.4    vctrs_0.6.5       
